@@ -23,6 +23,10 @@ THEME_LIBRARY = [
         "angle": "按说明书用于日常口腔护理场景，突出规格、用法和清爽体验",
         "trust": "以注册证/说明书/标签信息为准，不夸大功效",
         "promo": "基础价格带测试",
+        "visual_style": "天猫清爽医护风",
+        "palette": "白色、浅薄荷绿、浅蓝点缀",
+        "composition": "中心产品大图+右侧卖点信息卡+底部规格条",
+        "texture": "干净留白、轻医疗感、高清棚拍",
     },
     {
         "name": "正畸人群护理",
@@ -33,6 +37,10 @@ THEME_LIBRARY = [
         "angle": "强调正畸护理场景和便捷含漱，不使用治疗承诺",
         "trust": "规格、成分、适用范围清晰展示",
         "promo": "组合装价格测试",
+        "visual_style": "正畸护理专业风",
+        "palette": "白色、牙釉质浅米色、金属银灰点缀",
+        "composition": "产品前景+牙套/保持器场景道具+步骤型信息卡",
+        "texture": "理性克制、线条清晰、轻科普感",
     },
     {
         "name": "家庭备用护理",
@@ -43,6 +51,10 @@ THEME_LIBRARY = [
         "angle": "突出家庭备用、规格清楚、使用提醒明确",
         "trust": "真实产品包装、资质文件夹和说明信息支撑",
         "promo": "多瓶装优惠测试",
+        "visual_style": "家庭生活温和风",
+        "palette": "暖白、浅木色、柔和橙色点缀",
+        "composition": "洗漱台家庭场景+多瓶组合陈列+家庭备用标签",
+        "texture": "温暖真实、居家收纳感、自然光",
     },
     {
         "name": "饭后清爽护理",
@@ -53,6 +65,10 @@ THEME_LIBRARY = [
         "angle": "表达饭后清爽护理体验，避免疾病和疗效表达",
         "trust": "成分和规格明确，按说明合理使用",
         "promo": "单瓶低门槛测试",
+        "visual_style": "办公室轻快风",
+        "palette": "白色、浅灰、清爽柑橘橙点缀",
+        "composition": "办公桌/午休洗手台场景+产品特写+痛点问句",
+        "texture": "轻快明亮、年轻化、内容流友好",
     },
     {
         "name": "出行便携护理",
@@ -63,6 +79,10 @@ THEME_LIBRARY = [
         "angle": "强调出行收纳、便捷使用和规格信息",
         "trust": "展示真实瓶身、包装和使用步骤",
         "promo": "单瓶/多瓶便携组合测试",
+        "visual_style": "出行便携场景风",
+        "palette": "雾白、浅卡其、旅行蓝点缀",
+        "composition": "洗漱包/行李箱局部+产品斜向摆放+便携场景图标",
+        "texture": "旅行收纳感、轻户外、干净不杂乱",
     },
     {
         "name": "成分信息透明",
@@ -73,6 +93,10 @@ THEME_LIBRARY = [
         "angle": "展示成分、规格、适用范围和说明书提醒",
         "trust": "不做功效承诺，以资料信息建立信任",
         "promo": "信任背书优先测试",
+        "visual_style": "成分透明科普风",
+        "palette": "白色、浅青绿、实验室透明感点缀",
+        "composition": "产品+成分信息模块+简洁分子/水滴图标",
+        "texture": "清透、专业、信息可读性强",
     },
     {
         "name": "使用步骤清晰",
@@ -83,6 +107,10 @@ THEME_LIBRARY = [
         "angle": "用步骤图降低理解成本，强调按说明书合理使用",
         "trust": "步骤清楚、注意事项清楚、资质真实",
         "promo": "教程型链接测试",
+        "visual_style": "教程步骤插画风",
+        "palette": "白色、浅蓝、柔和绿色",
+        "composition": "三步流程横向或环形排列+产品固定在画面一侧",
+        "texture": "说明书友好、图标化、步骤清楚",
     },
     {
         "name": "规格组合清楚",
@@ -93,6 +121,10 @@ THEME_LIBRARY = [
         "angle": "清楚展示1瓶、2瓶、3瓶区别，避免低价误导",
         "trust": "规格、数量、价格带一致，减少误解",
         "promo": "SKU组合转化测试",
+        "visual_style": "电商SKU转化风",
+        "palette": "白色、浅灰、价格标签红少量点缀",
+        "composition": "1瓶/2瓶/3瓶阶梯陈列+SKU卡片+购买选择对比",
+        "texture": "转化导向、信息密度中等、货架感清楚",
     },
     {
         "name": "资质安心说明",
@@ -103,6 +135,10 @@ THEME_LIBRARY = [
         "angle": "展示资质与说明书信息，避免医生/机构背书",
         "trust": "注册证/资质图真实展示，宣传不超范围",
         "promo": "信任转化测试",
+        "visual_style": "资质背书稳重风",
+        "palette": "白色、深蓝、银灰点缀",
+        "composition": "产品+资质文件局部+背书徽章矩阵",
+        "texture": "稳重可信、证照展示感、商务清晰",
     },
     {
         "name": "温和口感体验",
@@ -113,8 +149,14 @@ THEME_LIBRARY = [
         "angle": "突出香橙香精等体验信息，避免疗效夸张",
         "trust": "成分信息和使用体验表达分开，不做保证",
         "promo": "体验感方向测试",
+        "visual_style": "香橙清新体验风",
+        "palette": "白色、浅橙、清透水感蓝",
+        "composition": "产品+橙色清新元素+水感背景+体验短标签",
+        "texture": "清新水润、轻生活方式、柔和不医疗化",
     },
 ]
+
+THEME_BY_NAME = {theme["name"]: theme for theme in THEME_LIBRARY}
 
 
 ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
@@ -319,6 +361,10 @@ class ProductionGenerator:
                             "链接序号": index,
                             "主题名称": theme["name"],
                             "主题风格": theme["style"],
+                            "视觉风格": theme["visual_style"],
+                            "色调搭配": theme["palette"],
+                            "推荐构图": theme["composition"],
+                            "画面质感": theme["texture"],
                             "目标人群": theme["audience"],
                             "使用场景": theme["scene"],
                             "核心痛点": theme["pain"],
@@ -501,7 +547,6 @@ class ProductionGenerator:
                         "场景参考图路径": "",
                         "匹配参考素材ID": "",
                         "参考素材使用方式": "本次测试暂不使用参考素材池，先按主题方向和产品实拍图生成。",
-                        "生图提示词": self._image_prompt(asset_type, theme, fields, size),
                         "ChatGPT对话批次": self._chat_batch(asset_type),
                         "建议单轮生成数量": 1 if asset_type in {"详情页", "SKU图", "资质图", "产品视频"} else 2,
                         "输出文件名": f"{task_id}.png" if asset_type != "产品视频" else f"{task_id}.mp4",
@@ -532,7 +577,7 @@ class ProductionGenerator:
             "主文案": self._main_copy(asset_type, seq, theme, fields),
             "辅助文案": self._sub_copy(asset_type, seq, theme, fields),
             "画面描述": self._visual_prompt(asset_type, seq, theme, fields),
-            "设计要求": self._design_requirement(asset_type, seq),
+            "设计要求": self._design_requirement(asset_type, seq, theme),
             "详情页衔接要求": self._detail_flow(seq) if asset_type == "详情页" else "",
             "品牌背书模块": "恒品关注日常生活与家庭护理场景，商品信息以页面展示、产品标签、说明书及相关资质文件为准，请按说明合理使用。"
             if asset_type == "详情页" and seq == 6
@@ -612,15 +657,21 @@ class ProductionGenerator:
         }.get(asset_type, "A")
 
     def _theme_from_fields(self, fields: dict[str, Any]) -> dict[str, str]:
+        name = as_text(fields.get("主题名称"))
+        defaults = THEME_BY_NAME.get(name, {})
         return {
-            "name": as_text(fields.get("主题名称")),
-            "style": as_text(fields.get("主题风格")),
-            "audience": as_text(fields.get("目标人群")),
-            "scene": as_text(fields.get("使用场景")),
-            "pain": as_text(fields.get("核心痛点")),
-            "angle": as_text(fields.get("核心卖点")),
-            "trust": as_text(fields.get("信任背书")),
-            "promo": as_text(fields.get("价格/促销方向")),
+            "name": name,
+            "style": as_text(fields.get("主题风格")) or defaults.get("style", ""),
+            "audience": as_text(fields.get("目标人群")) or defaults.get("audience", ""),
+            "scene": as_text(fields.get("使用场景")) or defaults.get("scene", ""),
+            "pain": as_text(fields.get("核心痛点")) or defaults.get("pain", ""),
+            "angle": as_text(fields.get("核心卖点")) or defaults.get("angle", ""),
+            "trust": as_text(fields.get("信任背书")) or defaults.get("trust", ""),
+            "promo": as_text(fields.get("价格/促销方向")) or defaults.get("promo", ""),
+            "visual_style": as_text(fields.get("视觉风格")) or defaults.get("visual_style", ""),
+            "palette": as_text(fields.get("色调搭配")) or defaults.get("palette", ""),
+            "composition": as_text(fields.get("推荐构图")) or defaults.get("composition", ""),
+            "texture": as_text(fields.get("画面质感")) or defaults.get("texture", ""),
         }
 
     def _variant(self, asset_type: str, seq: int) -> dict[str, str]:
@@ -673,9 +724,13 @@ class ProductionGenerator:
         variant = self._variant(asset_type, seq)
         return self._format_variant(variant["visual"], asset_type, theme, fields)
 
-    def _design_requirement(self, asset_type: str, seq: int) -> str:
+    def _design_requirement(self, asset_type: str, seq: int, theme: dict[str, str]) -> str:
         purpose = self._variant(asset_type, seq).get("purpose", asset_type)
-        return f"本图目的：{purpose}。画面清晰、产品真实突出、信息层级明确，不使用夸张对比和医疗化承诺。"
+        return (
+            f"本图目的：{purpose}。视觉风格：{theme.get('visual_style', '')}；"
+            f"色调搭配：{theme.get('palette', '')}。"
+            "画面清晰、产品真实突出、信息层级明确，不使用夸张对比和医疗化承诺。"
+        )
 
     def _image_prompt(self, asset_type: str, seq: int, theme: dict[str, str], fields: dict[str, Any], size: str) -> str:
         variant = self._variant(asset_type, seq)
@@ -694,12 +749,20 @@ class ProductionGenerator:
             "同时解释该场景为什么需要这个产品、产品解决什么护理需求、给用户带来什么选择好处。"
             "如使用“二类医疗器械”等背书，只能作为资质信息角标表达，并保持“信息以资质/说明书为准”的稳妥口径。"
         )
+        differentiation_rule = (
+            f"本链接的专属视觉风格：{theme.get('visual_style', '')}；"
+            f"专属色调：{theme.get('palette', '')}；"
+            f"推荐构图：{theme.get('composition', '')}；"
+            f"画面质感：{theme.get('texture', '')}。"
+            "请让本链接与其他主题链接在色调、构图、道具、信息卡样式和整体气质上明显区分，"
+            "但产品瓶身、包装、规格和资质信息必须保持真实一致。"
+        )
         return (
             f"请基于上传的产品参考图生成{asset_type}第{seq}张，图片目的：{purpose}，尺寸要求：{size}。"
             f"产品：{as_text(fields.get('标准产品名称'))}；规格：{as_text(fields.get('规格/型号/数量'))}；"
             f"主题：{theme['name']}；目标人群：{theme['audience']}；使用场景：{theme['scene']}。"
             f"画面方向：{visual}。"
-            f"画面文字主标题：{main}。辅助文字参考：{sub}。{visible_text_rule}{ecommerce_layout_rule}"
+            f"画面文字主标题：{main}。辅助文字参考：{sub}。{visible_text_rule}{ecommerce_layout_rule}{differentiation_rule}"
             "要求画面真实清晰，产品主体完整突出，避免医疗化治疗承诺、绝对化词汇、夸张前后对比、医生专家背书、二维码和外部联系方式。"
             "文案只使用稳妥表达：按说明合理使用、日常口腔护理、信息以说明书和资质文件为准。"
         )
