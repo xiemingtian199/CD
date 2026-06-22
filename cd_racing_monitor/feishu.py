@@ -9,6 +9,17 @@ from urllib import parse, request
 from .config import FeishuConfig
 
 
+FIELD_INPUT_MARKER = "🟩"
+FIELD_IMPORTANT_MARKER = "🔴"
+
+
+def normalize_field_label(name: str) -> str:
+    label = str(name).strip()
+    while label.startswith((FIELD_INPUT_MARKER, FIELD_IMPORTANT_MARKER)):
+        label = label[1:].strip()
+    return label
+
+
 class FeishuClient:
     def __init__(self, config: FeishuConfig) -> None:
         self.config = config
@@ -34,17 +45,28 @@ class FeishuClient:
             page_token = data.get("page_token", "")
             if not page_token:
                 break
+        for record in records:
+            fields = record.get("fields")
+            if isinstance(fields, dict):
+                self._add_normalized_field_aliases(fields)
         return records
 
     def update_record(self, table_id: str, record_id: str, fields: dict[str, Any]) -> None:
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records/{record_id}"
-        self._request("PUT", path, {"fields": fields})
+        self._request("PUT", path, {"fields": self._resolve_field_names(table_id, fields)})
 
     def update_records_batch(self, table_id: str, records: list[dict[str, Any]]) -> int:
         if not records:
             return 0
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records/batch_update"
-        payload = self._request("POST", path, {"records": records})
+        normalized_records = []
+        for record in records:
+            normalized = dict(record)
+            fields = normalized.get("fields")
+            if isinstance(fields, dict):
+                normalized["fields"] = self._resolve_field_names(table_id, fields)
+            normalized_records.append(normalized)
+        payload = self._request("POST", path, {"records": normalized_records})
         updated = payload.get("data", {}).get("records", [])
         return len(updated) if updated else len(records)
 
@@ -87,7 +109,7 @@ class FeishuClient:
 
     def create_record(self, table_id: str, fields: dict[str, Any]) -> str:
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records"
-        payload = self._request("POST", path, {"fields": fields})
+        payload = self._request("POST", path, {"fields": self._resolve_field_names(table_id, fields)})
         record = payload.get("data", {}).get("record", {})
         return str(record.get("record_id", ""))
 
@@ -95,9 +117,42 @@ class FeishuClient:
         if not rows:
             return 0
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records/batch_create"
-        payload = self._request("POST", path, {"records": [{"fields": row} for row in rows]})
+        payload = self._request(
+            "POST",
+            path,
+            {"records": [{"fields": self._resolve_field_names(table_id, row)} for row in rows]},
+        )
         records = payload.get("data", {}).get("records", [])
         return len(records) if records else len(rows)
+
+    def _resolve_field_names(self, table_id: str, fields: dict[str, Any]) -> dict[str, Any]:
+        if not fields:
+            return fields
+        actual_by_name: dict[str, str] = {}
+        actual_by_normalized: dict[str, str] = {}
+        for field in self.list_fields(table_id):
+            actual = str(field.get("field_name") or field.get("name") or "")
+            if not actual:
+                continue
+            actual_by_name[actual] = actual
+            actual_by_normalized.setdefault(normalize_field_label(actual), actual)
+
+        resolved: dict[str, Any] = {}
+        for key, value in fields.items():
+            key_text = str(key)
+            resolved_key = actual_by_name.get(key_text) or actual_by_normalized.get(
+                normalize_field_label(key_text),
+                key_text,
+            )
+            resolved[resolved_key] = value
+        return resolved
+
+    @staticmethod
+    def _add_normalized_field_aliases(fields: dict[str, Any]) -> None:
+        for key, value in list(fields.items()):
+            normalized = normalize_field_label(str(key))
+            if normalized and normalized != key and normalized not in fields:
+                fields[normalized] = value
 
     def _bitable_app_token(self) -> str:
         if self._bitable_app_token_value:

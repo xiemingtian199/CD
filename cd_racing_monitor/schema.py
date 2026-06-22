@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import logging
 
-from .feishu import FeishuClient
+from .feishu import FeishuClient, normalize_field_label
 
 
 TEXT = 1
@@ -151,9 +151,9 @@ def setup_feishu_schema(client: FeishuClient, logger: logging.Logger) -> dict[st
 
 
 def ensure_fields(client: FeishuClient, table_id_value: str, table_spec: TableSpec, logger: logging.Logger) -> None:
-    existing_fields = {field_name(item) for item in client.list_fields(table_id_value)}
+    existing_fields = {normalize_field_label(field_name(item)) for item in client.list_fields(table_id_value)}
     for field in table_spec.fields:
-        if field.name in existing_fields:
+        if normalize_field_label(field.name) in existing_fields:
             continue
         client.create_field(table_id_value, field.name, field.type)
         logger.info("已补齐字段：%s.%s", table_spec.name, field.name)
