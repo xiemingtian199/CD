@@ -168,13 +168,12 @@ def main() -> None:
     if args.setup_100_link_plan:
         result = Production100LinksPlanBuilder(load_config(), args.production_plan_doc, logger).build()
         logger.info(
-            "100链接计划已创建：产品资料 %s，主题规划 %s，素材任务 %s，合规风险 %s，参考素材 %s，平台规范 %s；文档：%s",
+            "100链接计划已创建：产品资料 %s，主题规划 %s，素材任务 %s，合规风险 %s，参考素材 %s；文档：%s",
             result.product_table_id,
             result.theme_table_id,
             result.task_table_id,
             result.risk_table_id,
             result.reference_table_id,
-            result.platform_rule_table_id,
             result.doc_path,
         )
         return

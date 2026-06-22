@@ -7,6 +7,7 @@ from typing import Any
 
 from .config import AppConfig
 from .feishu import FeishuClient
+from .platform_requirements import platform_requirements_dir
 from .schema import DATE, NUMBER, TEXT, FieldSpec, TableSpec, ensure_fields, table_id, table_name
 
 
@@ -16,7 +17,6 @@ THEME_TABLE = f"{PREFIX}链接主题规划表"
 TASK_TABLE = f"{PREFIX}素材生产任务表"
 RISK_TABLE = f"{PREFIX}合规风险检查表"
 REFERENCE_TABLE = f"{PREFIX}参考素材池"
-PLATFORM_RULE_TABLE = f"{PREFIX}平台规范库"
 
 
 @dataclass
@@ -26,7 +26,6 @@ class ProductionPlanResult:
     task_table_id: str
     risk_table_id: str
     reference_table_id: str
-    platform_rule_table_id: str
     doc_path: Path
 
 
@@ -53,10 +52,6 @@ PRODUCT_SPEC = TableSpec(
         FieldSpec("产品实拍文件夹", TEXT),
         FieldSpec("注册证/资质文件夹", TEXT),
         FieldSpec("🔴可宣传范围", TEXT),
-        FieldSpec("🔴禁止宣传范围", TEXT),
-        FieldSpec("🔴产品禁用词", TEXT),
-        FieldSpec("🔴资质审核状态", TEXT),
-        FieldSpec("🔴产品准入结论", TEXT),
         FieldSpec("备注", TEXT),
         FieldSpec("创建时间", DATE),
     ),
@@ -192,32 +187,6 @@ REFERENCE_SPEC = TableSpec(
 )
 
 
-PLATFORM_RULE_SPEC = TableSpec(
-    name=PLATFORM_RULE_TABLE,
-    fields=(
-        FieldSpec("🔴规范ID", TEXT),
-        FieldSpec("平台", TEXT),
-        FieldSpec("品类范围", TEXT),
-        FieldSpec("是否医疗器械/消毒产品", TEXT),
-        FieldSpec("可宣传表达", TEXT),
-        FieldSpec("禁止表达", TEXT),
-        FieldSpec("争议表达", TEXT),
-        FieldSpec("争议处理方式", TEXT),
-        FieldSpec("资质要求", TEXT),
-        FieldSpec("主图限制", TEXT),
-        FieldSpec("详情页限制", TEXT),
-        FieldSpec("视频/口播限制", TEXT),
-        FieldSpec("价格/SKU限制", TEXT),
-        FieldSpec("审核严格度", TEXT),
-        FieldSpec("🔴生成前自检要求", TEXT),
-        FieldSpec("🔴人工重点审核项", TEXT),
-        FieldSpec("规范来源/链接", TEXT),
-        FieldSpec("生效状态", TEXT),
-        FieldSpec("更新时间", DATE),
-    ),
-)
-
-
 class Production100LinksPlanBuilder:
     def __init__(self, config: AppConfig, output_path: str | Path, logger) -> None:
         self.config = config
@@ -234,12 +203,11 @@ class Production100LinksPlanBuilder:
             task_table_id=ids[TASK_TABLE],
             risk_table_id=ids[RISK_TABLE],
             reference_table_id=ids[REFERENCE_TABLE],
-            platform_rule_table_id=ids[PLATFORM_RULE_TABLE],
             doc_path=doc_path,
         )
 
     def _ensure_tables(self) -> dict[str, str]:
-        specs = (PRODUCT_SPEC, THEME_SPEC, TASK_SPEC, RISK_SPEC, REFERENCE_SPEC, PLATFORM_RULE_SPEC)
+        specs = (PRODUCT_SPEC, THEME_SPEC, TASK_SPEC, RISK_SPEC, REFERENCE_SPEC)
         existing = {table_name(item): table_id(item) for item in self.client.list_tables()}
         output: dict[str, str] = {}
         for spec in specs:
@@ -311,6 +279,7 @@ def bitable_link(table_id_value: str) -> str:
 
 def render_markdown(ids: dict[str, str]) -> str:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    requirements_path = platform_requirements_dir()
     return f"""# 100链接/天素材生产自动化计划
 
 > 生成时间：{now}
@@ -333,11 +302,10 @@ def render_markdown(ids: dict[str, str]) -> str:
 
 | 表格 | 用途 | 链接 |
 | --- | --- | --- |
-| 100链接计划-产品素材资料库 | 存放每款产品的基础资料、SKU、资质、禁用词和可宣传范围 | [打开]({bitable_link(ids[PRODUCT_TABLE])}) |
+| 100链接计划-产品素材资料库 | 存放每款产品的基础资料、SKU、资质、卖点和可宣传范围 | [打开]({bitable_link(ids[PRODUCT_TABLE])}) |
 | 100链接计划-链接主题规划表 | 为每款产品规划 10 条不同主题链接 | [打开]({bitable_link(ids[THEME_TABLE])}) |
 | 100链接计划-素材生产任务表 | 把每条链接拆成图片、视频、详情页、资质图等具体生产任务 | [打开]({bitable_link(ids[TASK_TABLE])}) |
-| 100链接计划-参考素材池 | 存放竞品图、行业优秀图、内部历史高转化素材、场景参考图，用于提高生图一次成功率 | [打开]({bitable_link(ids[REFERENCE_TABLE])}) |
-| 100链接计划-平台规范库 | 提前录入各平台对医疗器械/消毒产品等涉及品类的规范，生成前先做自我审核 | [打开]({bitable_link(ids[PLATFORM_RULE_TABLE])}) |
+| 100链接计划-参考素材池 | 可选表；后续用于存放竞品图、行业优秀图、内部历史高转化素材、场景参考图，本次测试可先不填 | [打开]({bitable_link(ids[REFERENCE_TABLE])}) |
 | 100链接计划-合规风险检查表 | 记录每条素材的风险命中、替代表达和人工处理意见 | [打开]({bitable_link(ids[RISK_TABLE])}) |
 
 ## 2. 总体流程
@@ -345,7 +313,7 @@ def render_markdown(ids: dict[str, str]) -> str:
 ```mermaid
 flowchart TD
   A["产品素材资料库"] --> B["链接主题规划表"]
-  P["平台规范库"] --> B
+  P["本地平台要求文件夹"] --> B
   P --> C
   B --> C["素材生产任务表"]
   R["参考素材池"] --> C
@@ -384,10 +352,10 @@ flowchart TD
 - 产品实拍文件夹：用于场景图、笔记图、详情页。
 - 注册证/资质文件夹：医疗器械等产品必须填写。
 - 可宣传范围：结合平台规范库和产品资质，提前写清楚允许表达的内容。
-- 禁止宣传范围：结合平台规范库和产品资质，提前写清楚不能写的功效、场景、词汇。
-- 产品禁用词：产品维度禁用词。
-- 资质审核状态：未审核、通过、驳回、需补充。
-- 产品准入结论：可生产、需补资料、禁止生产。
+
+平台违禁词、禁止表达、资质边界和生成前合规要求不再在产品素材资料库中逐项填写，统一读取本地文件夹：
+
+`{requirements_path}`
 
 ### 3.3 输出内容
 
@@ -396,7 +364,7 @@ flowchart TD
 - 可生成链接主题的产品基础信息。
 - 可生成素材文案的卖点、场景、人群。
 - 可生成 SKU 图的 SKU 明细。
-- 可进行合规检查的禁用词和可宣传范围。
+- 可进行合规检查的可宣传范围和本地平台要求。
 - 可上架使用的资质图来源。
 
 ### 3.4 生成前人工参与点
@@ -405,8 +373,8 @@ flowchart TD
 
 生成前必须完成：
 
-- 在 `100链接计划-平台规范库` 中录入目标平台对医疗器械/消毒产品等涉及品类的规范。
-- 在产品素材资料库中写清楚该产品的可宣传范围、禁止宣传范围和产品禁用词。
+- 在 `{requirements_path}` 中维护平台对医疗器械/消毒产品等涉及品类的规范。
+- 在产品素材资料库中写清楚该产品的真实卖点、资质文件夹和可宣传范围。
 - 医疗器械产品必须确认注册证、备案凭证、说明书、标签标识是否完整。
 - 注册证宣传范围必须先和产品卖点做一次对齐，不能等素材生成后再补。
 - SKU 是否存在低价引流、规格混淆、赠品误导，要在主题规划前先确认。
@@ -439,7 +407,7 @@ flowchart TD
 - 可宣传范围
 - 禁止宣传范围
 
-来自平台规范库：
+来自本地平台要求文件夹：
 
 - 平台
 - 品类范围
@@ -506,17 +474,19 @@ flowchart TD
 - 医疗器械是否出现治疗、康复、止痛、修复等超范围方向。
 - 是否存在平台不允许的目标人群或使用场景。
 
-## 4A. 环节二前置：平台规范库
+## 4A. 环节二前置：本地平台要求
 
 ### 4A.1 目标
 
-把平台规则前置给 AI，让 AI 在生成主题、文案、画面描述、生图提示词之前先做自我审核，而不是等素材生成后才发现违规。
+把平台规则前置给 AI，让 AI 在生成主题、文案、画面描述、生图提示词之前先做自我审核，而不是等素材生成后才发现违规。本次测试不使用飞书平台规范库，统一读取本地目录：
+
+`{requirements_path}`
 
 ### 4A.2 输入内容
 
 <span style="color:red">🔴 只录入当前实际涉及品类的规范，暂时重点是医疗器械和消毒产品，不要把暂不涉及的食品、母婴、化妆品等规则混进来。</span>
 
-每条平台规范应包含：
+本地平台要求文件建议包含：
 
 - 规范ID
 - 平台
@@ -539,7 +509,7 @@ flowchart TD
 
 ### 4A.3 输出内容
 
-平台规范库输出的是“生成前约束包”：
+本地平台要求输出的是“生成前约束包”：
 
 - 主题规划时用来排除明显违规方向。
 - 文案生成时用来限制禁用词和功效表达。
@@ -659,7 +629,7 @@ flowchart TD
 - 禁用词
 - 可宣传范围
 
-来自平台规范库：
+来自本地平台要求文件夹：
 
 - 可宣传表达
 - 禁止表达
@@ -801,7 +771,7 @@ flowchart TD
 
 <span style="color:red">🔴 生图不能只靠文字提示词。必须建立参考素材池，用参考图约束构图、场景、风格和信息层级。</span>
 
-参考素材池的作用：
+参考素材池的作用。本次测试可先不填写，后续跑通方向后再补充固定视觉风格、构图和场景参考：
 
 - 降低“抽卡”次数。
 - 让不同链接的素材有方向差异，但不至于风格完全失控。
@@ -903,11 +873,8 @@ flowchart TD
 
 来自产品素材资料库：
 
-- 产品禁用词
 - 可宣传范围
-- 禁止宣传范围
 - 产品类目
-- 资质审核状态
 
 平台通用风险词库：
 
@@ -1063,19 +1030,17 @@ P2 提醒：可继续生产，但建议优化表达。
 其他 Agent 接手时，应按以下顺序执行：
 
 1. 读取 `100链接计划-产品素材资料库`。
-2. 读取 `100链接计划-平台规范库`，只加载当前产品涉及品类的规范，例如医疗器械、消毒产品。
-3. 只处理 `产品准入结论=可生产` 的产品。
-4. 生成主题前，先根据平台规范库做自我审核，排除明确违规方向。
+2. 读取 `{requirements_path}`，加载当前平台和品类的素材合规要求。
+3. 生成主题前，先根据本地平台要求做自我审核，排除明确违规方向。
 5. 每款产品生成 10 条主题，写入 `100链接计划-链接主题规划表`。
 6. 对有争议但不明确违规的方向，标记 `🔴争议待审`，不要直接删除。
 7. 每条主题拆解为素材任务，写入 `100链接计划-素材生产任务表`。
-8. 从 `100链接计划-参考素材池` 中为每条任务匹配参考素材。
-9. 把参考素材ID和参考方式写回 `素材生产任务表`。
-10. 根据产品资料、平台规范、主题规划、参考素材生成生图提示词。
-11. 对所有文案、画面描述、口播脚本、生图提示词做合规检查。
-12. 命中风险的内容写入 `100链接计划-合规风险检查表`。
-13. P0 风险必须阻断，P1/争议项必须等待人工确认。
-14. 只有合规初检通过且人工审核通过的任务，才能进入制作和上架包。
+7. 本次测试参考素材池可为空；没有参考素材时，先按方向文案和平台要求生成基础提示词。
+8. 根据产品资料、本地平台要求、主题规划生成生图提示词。
+9. 对所有文案、画面描述、口播脚本、生图提示词做合规检查。
+10. 命中风险的内容写入 `100链接计划-合规风险检查表`。
+11. P0 风险必须阻断，P1/争议项必须等待人工确认。
+12. 只有合规初检通过且人工审核通过的任务，才能进入制作和上架包。
 
 ## 9. 最低可运行版本
 
