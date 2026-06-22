@@ -683,12 +683,16 @@ class ProductionGenerator:
         visual = self._visual_prompt(asset_type, seq, theme, fields)
         main = self._main_copy(asset_type, seq, theme, fields)
         sub = self._sub_copy(asset_type, seq, theme, fields)
+        visible_text_rule = (
+            "画面可见文字只允许使用主标题；辅助文字仅用于理解画面和构图，不得作为文字写入图片。"
+            "如果画面需要说明信息，请用图标、场景、产品摆放和少量无具体文字的信息块表达。"
+        )
         return (
             f"请基于上传的产品参考图生成{asset_type}第{seq}张，图片目的：{purpose}，尺寸要求：{size}。"
             f"产品：{as_text(fields.get('标准产品名称'))}；规格：{as_text(fields.get('规格/型号/数量'))}；"
             f"主题：{theme['name']}；目标人群：{theme['audience']}；使用场景：{theme['scene']}。"
             f"画面方向：{visual}。"
-            f"画面文字主标题：{main}。辅助文字：{sub}。"
+            f"画面文字主标题：{main}。辅助文字参考：{sub}。{visible_text_rule}"
             "要求画面真实清晰，产品主体完整突出，避免医疗化治疗承诺、绝对化词汇、夸张前后对比、医生专家背书、二维码和外部联系方式。"
             "文案只使用稳妥表达：按说明合理使用、日常口腔护理、信息以说明书和资质文件为准。"
         )
