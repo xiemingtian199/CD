@@ -16,6 +16,7 @@ from .legacy_migration import LegacyMigrator
 from .links import LinkSynchronizer
 from .local_import import LocalLinkDataImporter
 from .pipeline import MonitorPipeline, evaluate_items
+from .production_generator import ProductionGenerator
 from .production_100_links import Production100LinksPlanBuilder
 from .priority_links import TestFocusLinkTableBuilder
 from .schema import setup_feishu_schema
@@ -41,6 +42,8 @@ def main() -> None:
     parser.add_argument("--direction-test-limit", type=int, default=20, help="下一轮测试计划最多生成多少条")
     parser.add_argument("--generate-creative-briefs", action="store_true", help="根据宣传方向库生成每个方向5张主图文案和画面描述")
     parser.add_argument("--setup-100-link-plan", action="store_true", help="创建每日100链接生产计划表并生成交接文档")
+    parser.add_argument("--generate-production-plan", action="store_true", help="根据产品素材资料库生成链接主题和素材生产任务")
+    parser.add_argument("--production-product-limit", type=int, default=5, help="生成生产计划时最多读取多少个产品")
     parser.add_argument("--production-plan-doc", default="outputs/100链接日更生产计划.md", help="每日100链接生产计划 Markdown 输出路径")
     args = parser.parse_args()
 
@@ -175,6 +178,17 @@ def main() -> None:
             result.risk_table_id,
             result.reference_table_id,
             result.doc_path,
+        )
+        return
+
+    if args.generate_production_plan:
+        result = ProductionGenerator(load_config(), logger).generate(limit=args.production_product_limit)
+        logger.info(
+            "生产计划已生成：读取产品 %s 个，新增主题 %s 条，新增素材任务 %s 条，新增合规风险 %s 条。",
+            result.product_count,
+            result.created_themes,
+            result.created_tasks,
+            result.created_risks,
         )
         return
 
