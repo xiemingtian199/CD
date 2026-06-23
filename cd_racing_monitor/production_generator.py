@@ -389,31 +389,17 @@ class ProductionGenerator:
         timestamp = int(datetime.now().timestamp() * 1000)
         product_records = self.client.list_records(table_ids[PRODUCT_TABLE], page_size=500)
         products = [row for row in product_records if as_text(row.get("fields", {}).get("款式编码"))][:limit]
-        existing = {
-            as_text(row.get("fields", {}).get("分析ID")) or as_text(row.get("fields", {}).get("款式编码")): row
-            for row in self.client.list_records(table_ids[ANALYSIS_TABLE], page_size=500)
-        }
+        product_ids = {as_text(row.get("fields", {}).get("款式编码")) for row in products}
+        for row in self.client.list_records(table_ids[ANALYSIS_TABLE], page_size=500):
+            fields = row.get("fields", {})
+            if as_text(fields.get("款式编码")) in product_ids:
+                self.client.delete_record(table_ids[ANALYSIS_TABLE], as_text(row.get("record_id")))
         create_rows: list[dict[str, Any]] = []
-        update_rows: list[dict[str, Any]] = []
         for product in products:
             fields = product.get("fields", {})
-            product_id = as_text(fields.get("款式编码"))
-            analysis_fields = self._product_analysis_fields(fields, timestamp)
-            if product_id in existing:
-                update_rows.append(
-                    {
-                        "record_id": as_text(existing[product_id].get("record_id")),
-                        "fields": analysis_fields,
-                    }
-                )
-            else:
-                analysis_fields["人工确认状态"] = "待确认"
-                create_rows.append(analysis_fields)
+            create_rows.extend(self._product_analysis_rows(fields, timestamp))
         created = self._batch_create(table_ids[ANALYSIS_TABLE], create_rows)
-        updated = 0
-        for index in range(0, len(update_rows), 100):
-            updated += self.client.update_records_batch(table_ids[ANALYSIS_TABLE], update_rows[index : index + 100])
-        return ProductAnalysisResult(product_count=len(products), created=created, updated=updated)
+        return ProductAnalysisResult(product_count=len(products), created=created, updated=0)
 
     def generate(self, limit: int = 5) -> ProductionGenerationResult:
         table_ids = self._table_ids()
@@ -610,19 +596,58 @@ class ProductionGenerator:
         return {name: existing[name] for name in required}
 
     def _confirmed_product_ids(self, table_ids: dict[str, str]) -> set[str]:
-        confirmed: set[str] = set()
+        statuses_by_product: dict[str, list[str]] = {}
         for row in self.client.list_records(table_ids[ANALYSIS_TABLE], page_size=500):
             fields = row.get("fields", {})
-            status = as_text(fields.get("人工确认状态"))
-            if status == "已确认":
-                confirmed.add(as_text(fields.get("款式编码")))
-        return {product_id for product_id in confirmed if product_id}
+            product_id = as_text(fields.get("款式编码"))
+            if not product_id:
+                continue
+            statuses_by_product.setdefault(product_id, []).append(as_text(fields.get("人工确认状态")))
+        return {
+            product_id
+            for product_id, statuses in statuses_by_product.items()
+            if statuses and all(status == "已确认" for status in statuses)
+        }
 
     def _title(self, fields: dict[str, Any]) -> str:
         product_name = as_text(fields.get("标准产品名称"))
         spec = as_text(fields.get("规格/型号/数量"))
         title_terms = self._product_title_terms(fields)
         return " ".join(part for part in [product_name, spec, title_terms] if part).strip()
+
+    def _product_analysis_rows(self, fields: dict[str, Any], timestamp: int) -> list[dict[str, Any]]:
+        product_id = as_text(fields.get("款式编码"))
+        product_name = as_text(fields.get("标准产品名称"))
+        target_count = int(as_number(fields.get("每日目标链接数")) or 10)
+        themes = self._product_themes(fields, target_count)
+        rows: list[dict[str, Any]] = []
+        for index, theme in enumerate(themes, start=1):
+            rows.append(
+                {
+                    "分析ID": f"{product_id}-P{index:02d}",
+                    "款式编码": product_id,
+                    "标准产品名称": product_name,
+                    "人群": theme["audience"],
+                    "场景": theme["scene"],
+                    "卖点": self._short_text(theme["angle"]),
+                    "消费者选择的原因": self._short_text(theme.get("buy_point") or theme["pain"]),
+                    "产品解决了什么问题": self._short_text(theme["pain"]),
+                    "为什么是这个产品来解决这个问题": self._short_text(theme["trust"]),
+                    "分析时间": timestamp,
+                    "人工确认状态": "待确认",
+                    "人工确认意见": "",
+                    "确认人": "",
+                    "确认时间": None,
+                }
+            )
+        return rows
+
+    @staticmethod
+    def _short_text(text: str, max_len: int = 80) -> str:
+        cleaned = as_text(text).replace("\n", " ").strip()
+        if len(cleaned) <= max_len:
+            return cleaned
+        return cleaned[: max_len - 1].rstrip("，；。 ") + "…"
 
     def _product_analysis_fields(self, fields: dict[str, Any], timestamp: int) -> dict[str, Any]:
         product_id = as_text(fields.get("款式编码"))
@@ -770,8 +795,8 @@ class ProductionGenerator:
         )
 
     def _product_title_terms(self, fields: dict[str, Any]) -> str:
-        text = self._product_text(fields)
-        if "脱敏" in text or "牙本质小管" in text:
+        text = self._positioning_text(fields)
+        if self._is_desensitizing_toothpaste(fields):
             return "牙齿敏感护理 牙龈护理"
         if "含漱" in text:
             return "日常口腔护理"
@@ -782,9 +807,21 @@ class ProductionGenerator:
         keys = ("标准产品名称", "产品类目", "基础卖点", "材质/成分", "可宣传范围", "适用人群", "适用场景")
         return "\n".join(as_text(fields.get(key)) for key in keys)
 
+    @staticmethod
+    def _positioning_text(fields: dict[str, Any]) -> str:
+        keys = ("标准产品名称", "基础卖点", "材质/成分", "可宣传范围", "适用人群", "适用场景")
+        return "\n".join(as_text(fields.get(key)) for key in keys)
+
+    def _is_desensitizing_toothpaste(self, fields: dict[str, Any]) -> bool:
+        text = self._positioning_text(fields)
+        product_name = as_text(fields.get("标准产品名称"))
+        if "含漱液" in product_name or "含漱" in product_name:
+            return False
+        strong_signals = ("医用口腔护理脱敏膏", "脱敏膏", "牙本质小管", "氯化锶", "生物活性玻璃")
+        return any(signal in text for signal in strong_signals)
+
     def _product_themes(self, fields: dict[str, Any], target_count: int) -> list[dict[str, str]]:
-        text = self._product_text(fields)
-        if "脱敏" in text or "牙本质小管" in text or "氯化锶" in text:
+        if self._is_desensitizing_toothpaste(fields):
             themes = self._desensitizing_toothpaste_themes(fields)
         else:
             themes = [dict(theme) for theme in THEME_LIBRARY]

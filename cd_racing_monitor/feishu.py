@@ -107,11 +107,19 @@ class FeishuClient:
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/fields/{field_id}"
         self._request("PUT", path, {"field_name": field_name, "type": field_type})
 
+    def delete_field(self, table_id: str, field_id: str) -> None:
+        path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/fields/{field_id}"
+        self._request("DELETE", path)
+
     def create_record(self, table_id: str, fields: dict[str, Any]) -> str:
         path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records"
         payload = self._request("POST", path, {"fields": self._resolve_field_names(table_id, fields)})
         record = payload.get("data", {}).get("record", {})
         return str(record.get("record_id", ""))
+
+    def delete_record(self, table_id: str, record_id: str) -> None:
+        path = f"/bitable/v1/apps/{self._bitable_app_token()}/tables/{table_id}/records/{record_id}"
+        self._request("DELETE", path)
 
     def create_records_batch(self, table_id: str, rows: list[dict[str, Any]]) -> int:
         if not rows:

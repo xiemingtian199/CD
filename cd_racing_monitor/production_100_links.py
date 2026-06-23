@@ -66,25 +66,12 @@ ANALYSIS_SPEC = TableSpec(
         FieldSpec("🔴分析ID", TEXT),
         FieldSpec("款式编码", TEXT),
         FieldSpec("标准产品名称", TEXT),
-        FieldSpec("产品类目", TEXT),
-        FieldSpec("平台", TEXT),
-        FieldSpec("负责人", TEXT),
-        FieldSpec("材质成分摘要", TEXT),
-        FieldSpec("预期用途摘要", TEXT),
-        FieldSpec("适用人群拆解", TEXT),
-        FieldSpec("适用场景拆解", TEXT),
-        FieldSpec("资质背书依据", TEXT),
-        FieldSpec("可宣传边界", TEXT),
-        FieldSpec("高风险表达提醒", TEXT),
-        FieldSpec("目标人群场景分析", TEXT),
-        FieldSpec("产品卖点梳理", TEXT),
-        FieldSpec("消费者买点梳理", TEXT),
-        FieldSpec("问题-解决路径", TEXT),
-        FieldSpec("为什么选择这个产品", TEXT),
-        FieldSpec("建议主题方向", TEXT),
-        FieldSpec("建议主文案方向", TEXT),
-        FieldSpec("合规提醒", TEXT),
-        FieldSpec("分析结论", TEXT),
+        FieldSpec("人群", TEXT),
+        FieldSpec("场景", TEXT),
+        FieldSpec("卖点", TEXT),
+        FieldSpec("消费者选择的原因", TEXT),
+        FieldSpec("产品解决了什么问题", TEXT),
+        FieldSpec("为什么是这个产品来解决这个问题", TEXT),
         FieldSpec("分析时间", DATE),
         FieldSpec("🟩🔴人工确认状态", TEXT),
         FieldSpec("🟩人工确认意见", TEXT),
@@ -260,6 +247,7 @@ class Production100LinksPlanBuilder:
                 self.logger.info("已创建 100 链接计划表：%s (%s)", spec.name, table_id_value)
             rename_legacy_fields(self.client, table_id_value, spec.name, self.logger)
             ensure_fields(self.client, table_id_value, spec, self.logger)
+            cleanup_analysis_fields(self.client, table_id_value, spec.name, self.logger)
             output[spec.name] = table_id_value
         return output
 
@@ -313,6 +301,23 @@ def rename_legacy_fields(client: FeishuClient, table_id_value: str, spec_name: s
         logger.info("已重命名字段：%s.%s -> %s", spec_name, old_name, new_name)
         existing_names.remove(old_name)
         existing_names.add(new_name)
+
+
+def cleanup_analysis_fields(client: FeishuClient, table_id_value: str, spec_name: str, logger) -> None:
+    if spec_name != ANALYSIS_TABLE:
+        return
+    keep = {field.name for field in ANALYSIS_SPEC.fields}
+    keep_normalized = {field.name.lstrip("🟩🔴").strip() for field in ANALYSIS_SPEC.fields}
+    for field in client.list_fields(table_id_value):
+        name = field_name(field)
+        normalized = name.lstrip("🟩🔴").strip()
+        if name in keep or normalized in keep_normalized:
+            continue
+        field_id_value = str(field.get("field_id") or field.get("id") or "")
+        if not field_id_value:
+            continue
+        client.delete_field(table_id_value, field_id_value)
+        logger.info("已删除定位表旧字段：%s.%s", spec_name, name)
 
 
 def field_name(item: dict[str, Any]) -> str:
