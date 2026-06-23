@@ -13,6 +13,7 @@ from .schema import DATE, NUMBER, TEXT, FieldSpec, TableSpec, ensure_fields, tab
 
 PREFIX = "100链接计划-"
 PRODUCT_TABLE = f"{PREFIX}产品素材资料库"
+ANALYSIS_TABLE = f"{PREFIX}产品定位分析表"
 THEME_TABLE = f"{PREFIX}链接主题规划表"
 TASK_TABLE = f"{PREFIX}素材生产任务表"
 RISK_TABLE = f"{PREFIX}合规风险检查表"
@@ -22,6 +23,7 @@ REFERENCE_TABLE = f"{PREFIX}参考素材池"
 @dataclass
 class ProductionPlanResult:
     product_table_id: str
+    analysis_table_id: str
     theme_table_id: str
     task_table_id: str
     risk_table_id: str
@@ -54,6 +56,40 @@ PRODUCT_SPEC = TableSpec(
         FieldSpec("🔴可宣传范围", TEXT),
         FieldSpec("备注", TEXT),
         FieldSpec("创建时间", DATE),
+    ),
+)
+
+
+ANALYSIS_SPEC = TableSpec(
+    name=ANALYSIS_TABLE,
+    fields=(
+        FieldSpec("🔴分析ID", TEXT),
+        FieldSpec("款式编码", TEXT),
+        FieldSpec("标准产品名称", TEXT),
+        FieldSpec("产品类目", TEXT),
+        FieldSpec("平台", TEXT),
+        FieldSpec("负责人", TEXT),
+        FieldSpec("材质成分摘要", TEXT),
+        FieldSpec("预期用途摘要", TEXT),
+        FieldSpec("适用人群拆解", TEXT),
+        FieldSpec("适用场景拆解", TEXT),
+        FieldSpec("资质背书依据", TEXT),
+        FieldSpec("可宣传边界", TEXT),
+        FieldSpec("高风险表达提醒", TEXT),
+        FieldSpec("目标人群场景分析", TEXT),
+        FieldSpec("产品卖点梳理", TEXT),
+        FieldSpec("消费者买点梳理", TEXT),
+        FieldSpec("问题-解决路径", TEXT),
+        FieldSpec("为什么选择这个产品", TEXT),
+        FieldSpec("建议主题方向", TEXT),
+        FieldSpec("建议主文案方向", TEXT),
+        FieldSpec("合规提醒", TEXT),
+        FieldSpec("分析结论", TEXT),
+        FieldSpec("分析时间", DATE),
+        FieldSpec("🟩🔴人工确认状态", TEXT),
+        FieldSpec("🟩人工确认意见", TEXT),
+        FieldSpec("🟩确认人", TEXT),
+        FieldSpec("🟩确认时间", DATE),
     ),
 )
 
@@ -203,6 +239,7 @@ class Production100LinksPlanBuilder:
         doc_path = self._write_doc(ids)
         return ProductionPlanResult(
             product_table_id=ids[PRODUCT_TABLE],
+            analysis_table_id=ids[ANALYSIS_TABLE],
             theme_table_id=ids[THEME_TABLE],
             task_table_id=ids[TASK_TABLE],
             risk_table_id=ids[RISK_TABLE],
@@ -211,7 +248,7 @@ class Production100LinksPlanBuilder:
         )
 
     def _ensure_tables(self) -> dict[str, str]:
-        specs = (PRODUCT_SPEC, THEME_SPEC, TASK_SPEC, RISK_SPEC, REFERENCE_SPEC)
+        specs = (PRODUCT_SPEC, ANALYSIS_SPEC, THEME_SPEC, TASK_SPEC, RISK_SPEC, REFERENCE_SPEC)
         existing = {table_name(item): table_id(item) for item in self.client.list_tables()}
         output: dict[str, str] = {}
         for spec in specs:
@@ -250,6 +287,12 @@ def rename_legacy_fields(client: FeishuClient, table_id_value: str, spec_name: s
         RISK_TABLE: {
             "产品ID": "款式编码",
             "产品名称": "标准产品名称",
+        },
+        ANALYSIS_TABLE: {
+            "🔴人工确认状态": "🟩🔴人工确认状态",
+            "人工确认意见": "🟩人工确认意见",
+            "确认人": "🟩确认人",
+            "确认时间": "🟩确认时间",
         },
     }
     mapping = rename_maps.get(spec_name, {})

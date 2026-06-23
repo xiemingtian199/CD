@@ -42,6 +42,7 @@ def main() -> None:
     parser.add_argument("--direction-test-limit", type=int, default=20, help="下一轮测试计划最多生成多少条")
     parser.add_argument("--generate-creative-briefs", action="store_true", help="根据宣传方向库生成每个方向5张主图文案和画面描述")
     parser.add_argument("--setup-100-link-plan", action="store_true", help="创建每日100链接生产计划表并生成交接文档")
+    parser.add_argument("--analyze-products", action="store_true", help="根据产品素材资料库生成产品定位分析，等待人工确认")
     parser.add_argument("--generate-production-plan", action="store_true", help="根据产品素材资料库生成链接主题和素材生产任务")
     parser.add_argument("--refresh-production-themes", action="store_true", help="根据产品资料刷新已生成的链接主题规划")
     parser.add_argument("--refresh-production-tasks", action="store_true", help="刷新已生成素材任务的文案、画面描述和生图提示词")
@@ -173,13 +174,24 @@ def main() -> None:
     if args.setup_100_link_plan:
         result = Production100LinksPlanBuilder(load_config(), args.production_plan_doc, logger).build()
         logger.info(
-            "100链接计划已创建：产品资料 %s，主题规划 %s，素材任务 %s，合规风险 %s，参考素材 %s；文档：%s",
+            "100链接计划已创建：产品资料 %s，产品分析 %s，主题规划 %s，素材任务 %s，合规风险 %s，参考素材 %s；文档：%s",
             result.product_table_id,
+            result.analysis_table_id,
             result.theme_table_id,
             result.task_table_id,
             result.risk_table_id,
             result.reference_table_id,
             result.doc_path,
+        )
+        return
+
+    if args.analyze_products:
+        result = ProductionGenerator(load_config(), logger).analyze_products(limit=args.production_product_limit)
+        logger.info(
+            "产品定位分析已生成：读取产品 %s 个，新增分析 %s 条，更新分析 %s 条。请在产品定位分析表中人工确认后再推进主题和素材任务。",
+            result.product_count,
+            result.created,
+            result.updated,
         )
         return
 

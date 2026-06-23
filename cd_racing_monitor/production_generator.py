@@ -9,7 +9,7 @@ from .config import AppConfig
 from .feishu import FeishuClient
 from .normalizer import as_number, as_text
 from .platform_requirements import read_platform_requirements
-from .production_100_links import PRODUCT_TABLE, RISK_TABLE, TASK_TABLE, THEME_TABLE
+from .production_100_links import ANALYSIS_TABLE, PRODUCT_TABLE, RISK_TABLE, TASK_TABLE, THEME_TABLE
 from .schema import table_id, table_name
 
 
@@ -371,16 +371,59 @@ class ProductionGenerationResult:
     updated_tasks: int = 0
 
 
+@dataclass(frozen=True)
+class ProductAnalysisResult:
+    product_count: int
+    created: int
+    updated: int
+
+
 class ProductionGenerator:
     def __init__(self, config: AppConfig, logger: logging.Logger) -> None:
         self.config = config
         self.logger = logger
         self.client = FeishuClient(config.feishu)
 
+    def analyze_products(self, limit: int = 20) -> ProductAnalysisResult:
+        table_ids = self._table_ids()
+        timestamp = int(datetime.now().timestamp() * 1000)
+        product_records = self.client.list_records(table_ids[PRODUCT_TABLE], page_size=500)
+        products = [row for row in product_records if as_text(row.get("fields", {}).get("款式编码"))][:limit]
+        existing = {
+            as_text(row.get("fields", {}).get("分析ID")) or as_text(row.get("fields", {}).get("款式编码")): row
+            for row in self.client.list_records(table_ids[ANALYSIS_TABLE], page_size=500)
+        }
+        create_rows: list[dict[str, Any]] = []
+        update_rows: list[dict[str, Any]] = []
+        for product in products:
+            fields = product.get("fields", {})
+            product_id = as_text(fields.get("款式编码"))
+            analysis_fields = self._product_analysis_fields(fields, timestamp)
+            if product_id in existing:
+                update_rows.append(
+                    {
+                        "record_id": as_text(existing[product_id].get("record_id")),
+                        "fields": analysis_fields,
+                    }
+                )
+            else:
+                analysis_fields["人工确认状态"] = "待确认"
+                create_rows.append(analysis_fields)
+        created = self._batch_create(table_ids[ANALYSIS_TABLE], create_rows)
+        updated = 0
+        for index in range(0, len(update_rows), 100):
+            updated += self.client.update_records_batch(table_ids[ANALYSIS_TABLE], update_rows[index : index + 100])
+        return ProductAnalysisResult(product_count=len(products), created=created, updated=updated)
+
     def generate(self, limit: int = 5) -> ProductionGenerationResult:
         table_ids = self._table_ids()
+        confirmed_product_ids = self._confirmed_product_ids(table_ids)
         product_records = self.client.list_records(table_ids[PRODUCT_TABLE], page_size=100)
-        products = [row for row in product_records if as_text(row.get("fields", {}).get("款式编码"))]
+        products = [
+            row
+            for row in product_records
+            if as_text(row.get("fields", {}).get("款式编码")) in confirmed_product_ids
+        ]
         products = products[:limit]
 
         existing_theme_ids = {
@@ -459,10 +502,11 @@ class ProductionGenerator:
     def refresh_themes(self) -> int:
         table_ids = self._table_ids()
         platform_requirements = read_platform_requirements()
+        confirmed_product_ids = self._confirmed_product_ids(table_ids)
         products = {
             as_text(row.get("fields", {}).get("款式编码")): row.get("fields", {})
             for row in self.client.list_records(table_ids[PRODUCT_TABLE], page_size=500)
-            if as_text(row.get("fields", {}).get("款式编码"))
+            if as_text(row.get("fields", {}).get("款式编码")) in confirmed_product_ids
         }
         updates: list[dict[str, Any]] = []
         timestamp = int(datetime.now().timestamp() * 1000)
@@ -499,10 +543,11 @@ class ProductionGenerator:
 
     def refresh_tasks(self) -> int:
         table_ids = self._table_ids()
+        confirmed_product_ids = self._confirmed_product_ids(table_ids)
         products = {
             as_text(row.get("fields", {}).get("款式编码")): row.get("fields", {})
             for row in self.client.list_records(table_ids[PRODUCT_TABLE], page_size=500)
-            if as_text(row.get("fields", {}).get("款式编码"))
+            if as_text(row.get("fields", {}).get("款式编码")) in confirmed_product_ids
         }
         themes = {
             as_text(row.get("fields", {}).get("主题ID")): self._theme_from_fields(row.get("fields", {}))
@@ -558,17 +603,171 @@ class ProductionGenerator:
 
     def _table_ids(self) -> dict[str, str]:
         existing = {table_name(item): table_id(item) for item in self.client.list_tables()}
-        required = (PRODUCT_TABLE, THEME_TABLE, TASK_TABLE, RISK_TABLE)
+        required = (PRODUCT_TABLE, ANALYSIS_TABLE, THEME_TABLE, TASK_TABLE, RISK_TABLE)
         missing = [name for name in required if not existing.get(name)]
         if missing:
             raise RuntimeError(f"Missing production tables: {', '.join(missing)}")
         return {name: existing[name] for name in required}
+
+    def _confirmed_product_ids(self, table_ids: dict[str, str]) -> set[str]:
+        confirmed: set[str] = set()
+        for row in self.client.list_records(table_ids[ANALYSIS_TABLE], page_size=500):
+            fields = row.get("fields", {})
+            status = as_text(fields.get("人工确认状态"))
+            if status == "已确认":
+                confirmed.add(as_text(fields.get("款式编码")))
+        return {product_id for product_id in confirmed if product_id}
 
     def _title(self, fields: dict[str, Any]) -> str:
         product_name = as_text(fields.get("标准产品名称"))
         spec = as_text(fields.get("规格/型号/数量"))
         title_terms = self._product_title_terms(fields)
         return " ".join(part for part in [product_name, spec, title_terms] if part).strip()
+
+    def _product_analysis_fields(self, fields: dict[str, Any], timestamp: int) -> dict[str, Any]:
+        product_id = as_text(fields.get("款式编码"))
+        product_name = as_text(fields.get("标准产品名称"))
+        category = as_text(fields.get("产品类目"))
+        platform = as_text(fields.get("平台"))
+        owner = as_text(fields.get("负责人"))
+        material = as_text(fields.get("材质/成分"))
+        scope = as_text(fields.get("可宣传范围")) or as_text(fields.get("基础卖点"))
+        people = as_text(fields.get("适用人群"))
+        scenes = as_text(fields.get("适用场景"))
+        spec = as_text(fields.get("规格/型号/数量"))
+        sku_detail = as_text(fields.get("SKU明细"))
+        themes = self._product_themes(fields, int(as_number(fields.get("每日目标链接数")) or 10))
+        return {
+            "分析ID": product_id,
+            "款式编码": product_id,
+            "标准产品名称": product_name,
+            "产品类目": category,
+            "平台": platform,
+            "负责人": owner,
+            "材质成分摘要": self._material_summary(fields),
+            "预期用途摘要": scope,
+            "适用人群拆解": self._audience_summary(people, themes),
+            "适用场景拆解": self._scene_summary(scenes, themes),
+            "资质背书依据": self._trust_basis(fields),
+            "可宣传边界": self._promotion_boundary(fields),
+            "高风险表达提醒": self._risk_expression_note(scope),
+            "目标人群场景分析": self._target_scene_analysis(themes),
+            "产品卖点梳理": self._selling_points_analysis(fields, themes),
+            "消费者买点梳理": self._buying_points_analysis(themes),
+            "问题-解决路径": self._problem_solution_analysis(themes),
+            "为什么选择这个产品": self._why_choose_analysis(fields, themes),
+            "建议主题方向": "\n".join(f"{index}. {theme['name']}：{theme['audience']}" for index, theme in enumerate(themes, 1)),
+            "建议主文案方向": "\n".join(
+                f"{index}. {theme.get('hero', theme['name'])} / {theme.get('buy_point', theme['pain'])}"
+                for index, theme in enumerate(themes, 1)
+            ),
+            "合规提醒": self._analysis_compliance_note(fields),
+            "分析结论": (
+                f"{product_name}的后续链接不应先套通用模板，应围绕产品成分、预期用途、适用人群和资质边界展开。"
+                f"规格/SKU信息为{spec}；SKU组合为{sku_detail}。人工确认后再进入主题规划与素材生产。"
+            ),
+            "分析时间": timestamp,
+        }
+
+    def _material_summary(self, fields: dict[str, Any]) -> str:
+        material = as_text(fields.get("材质/成分"))
+        text = self._product_text(fields)
+        if "脱敏" in text or "牙本质小管" in text:
+            return (
+                "核心成分与信息点：生物活性玻璃、氯化锶、氟化钠可作为脱敏护理和牙本质小管相关原理的说明抓手；"
+                "二氧化硅、羧甲基纤维素钠、聚乙二醇400等体现膏体基质；"
+                "β-葡聚糖、薄荷油、薄荷脑、留兰香油等可用于口感体验和成分透明方向。"
+                f"\n原始成分：{material}"
+            )
+        return f"原始成分：{material}"
+
+    @staticmethod
+    def _audience_summary(people: str, themes: list[dict[str, str]]) -> str:
+        lines = [f"原始适用人群：{people}"] if people else []
+        lines.extend(f"{index}. {theme['name']}：{theme['audience']}" for index, theme in enumerate(themes, 1))
+        return "\n".join(lines)
+
+    @staticmethod
+    def _scene_summary(scenes: str, themes: list[dict[str, str]]) -> str:
+        lines = [f"原始适用场景：{scenes}"] if scenes else []
+        lines.extend(f"{index}. {theme['name']}：{theme['scene']}" for index, theme in enumerate(themes, 1))
+        return "\n".join(lines)
+
+    def _trust_basis(self, fields: dict[str, Any]) -> str:
+        cert_path = as_text(fields.get("注册证/资质文件夹"))
+        scope = as_text(fields.get("可宣传范围")) or as_text(fields.get("基础卖点"))
+        return (
+            "资质背书优先使用：注册证、说明书、标签信息、页面真实展示和产品包装。"
+            f"\n资质文件夹：{cert_path}"
+            f"\n可宣传范围原文：{scope}"
+        )
+
+    def _promotion_boundary(self, fields: dict[str, Any]) -> str:
+        scope = as_text(fields.get("可宣传范围")) or as_text(fields.get("基础卖点"))
+        return (
+            "允许方向：围绕产品注册证/说明书/标签可证明的信息表达，包括成分、规格、适用范围、使用方法、资质可查。"
+            "\n谨慎方向：治疗、炎症、出血、抑制、减少等词如确属资质范围，可在人工确认后按说明书口径使用。"
+            "\n禁止方向：保证效果、立刻见效、根治、医生/机构背书、病例反馈、夸张对比、病灶刺激画面。"
+            f"\n原始范围：{scope}"
+        )
+
+    @staticmethod
+    def _risk_expression_note(scope: str) -> str:
+        risk_terms = [term for term in ("治疗", "炎症", "出血", "抑制", "减少", "牙菌斑", "过敏") if term in scope]
+        if not risk_terms:
+            return "未在可宣传范围中识别到明显高风险词，但仍需按平台规范审核。"
+        return (
+            f"识别到高风险/需确认表达：{', '.join(risk_terms)}。"
+            "这些词不能随意放大为功效承诺，应优先改写为“说明书适用范围、护理关注、按说明使用、信息以资质为准”。"
+        )
+
+    @staticmethod
+    def _target_scene_analysis(themes: list[dict[str, str]]) -> str:
+        return "\n".join(
+            f"{index}. {theme['name']}：面向{theme['audience']}，在{theme['scene']}中切入。核心问题是{theme['pain']}。"
+            for index, theme in enumerate(themes, 1)
+        )
+
+    @staticmethod
+    def _selling_points_analysis(fields: dict[str, Any], themes: list[dict[str, str]]) -> str:
+        product_name = as_text(fields.get("标准产品名称"))
+        return "\n".join(
+            f"{index}. {theme['name']}：卖点为{theme['angle']}；证明点为{theme.get('proof_points', theme['trust'])}。"
+            for index, theme in enumerate(themes, 1)
+        ) or f"{product_name}暂无可拆解卖点，请补充成分、用途和资质信息。"
+
+    @staticmethod
+    def _buying_points_analysis(themes: list[dict[str, str]]) -> str:
+        return "\n".join(
+            f"{index}. {theme['name']}：消费者买点是“{theme.get('buy_point', theme['pain'])}”，对应主张“{theme.get('hero', theme['name'])}”。"
+            for index, theme in enumerate(themes, 1)
+        )
+
+    @staticmethod
+    def _problem_solution_analysis(themes: list[dict[str, str]]) -> str:
+        return "\n".join(
+            f"{index}. {theme['name']}：用户问题={theme['pain']}；解决方式={theme['angle']}；选择理由={theme['trust']}。"
+            for index, theme in enumerate(themes, 1)
+        )
+
+    def _why_choose_analysis(self, fields: dict[str, Any], themes: list[dict[str, str]]) -> str:
+        spec = as_text(fields.get("规格/型号/数量"))
+        sku_detail = as_text(fields.get("SKU明细"))
+        reasons = [
+            "产品信息有明确成分、规格、适用范围和资质文件路径，可支撑素材生成前的事实核验。",
+            "卖点可以拆成原理、场景、成分、资质、规格、体验多条测试方向，适合做多链接赛马。",
+            f"规格为{spec}，SKU为{sku_detail}，可做单支测试和组合装转化测试。",
+        ]
+        proof_points = [theme.get("proof_points", "") for theme in themes if theme.get("proof_points")]
+        if proof_points:
+            reasons.append(f"可反复使用的证明点：{'；'.join(proof_points[:5])}。")
+        return "\n".join(f"{index}. {reason}" for index, reason in enumerate(reasons, 1))
+
+    def _analysis_compliance_note(self, fields: dict[str, Any]) -> str:
+        return (
+            self._promotion_boundary(fields)
+            + "\n人工确认要求：确认目标人群是否真实适用、卖点是否在资质范围内、主文案是否可上架、是否需要删除或降级争议表达。"
+        )
 
     def _product_title_terms(self, fields: dict[str, Any]) -> str:
         text = self._product_text(fields)
