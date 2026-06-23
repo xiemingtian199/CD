@@ -627,12 +627,12 @@ class ProductionGenerator:
                     "分析ID": f"{product_id}-P{index:02d}",
                     "款式编码": product_id,
                     "标准产品名称": product_name,
-                    "人群": theme["audience"],
+                    "人群": self._consumer_persona(theme, fields, index),
                     "场景": theme["scene"],
-                    "卖点": self._short_text(theme["angle"]),
-                    "消费者选择的原因": self._short_text(theme.get("buy_point") or theme["pain"]),
-                    "产品解决了什么问题": self._short_text(theme["pain"]),
-                    "为什么是这个产品来解决这个问题": self._short_text(theme["trust"]),
+                    "卖点": self._consumer_selling_point(theme),
+                    "消费者选择的原因": self._consumer_choice_reason(theme),
+                    "产品解决了什么问题": self._consumer_problem(theme),
+                    "为什么是这个产品来解决这个问题": self._why_this_product_reason(theme, fields),
                     "分析时间": timestamp,
                     "人工确认状态": "待确认",
                     "人工确认意见": "",
@@ -641,6 +641,122 @@ class ProductionGenerator:
                 }
             )
         return rows
+
+    def _consumer_persona(self, theme: dict[str, str], fields: dict[str, Any], index: int) -> str:
+        product_text = self._positioning_text(fields)
+        name = theme["name"]
+        if self._is_desensitizing_toothpaste(fields):
+            mapping = {
+                "牙齿敏感护理": "25-45岁｜男女不限｜资深中产/都市型男｜冷热酸甜入口容易敏感，愿意为针对性护理买单",
+                "牙本质小管原理": "25-40岁｜男女不限｜精致女性/悦己青年｜买前会看成分、原理和资质，偏理性决策",
+                "牙龈出血关注": "30-55岁｜男女不限｜资深中产/品质银发｜刷牙时关注牙龈状态，需要稳妥护理选择",
+                "牙菌斑管理": "25-45岁｜男女不限｜悦己青年/资深中产｜重视日常清洁管理，想把口腔护理做细",
+                "配方成分透明": "25-45岁｜女性为主｜精致女性/悦己青年｜关注配方表、成分透明和使用体验",
+                "居家日用步骤": "20-40岁｜男女不限｜平价青年/实惠大众｜第一次购买，希望使用方法简单清楚",
+                "规格组合选择": "25-50岁｜男女不限｜实惠大众/小镇中坚｜按家庭用量和预算选择组合规格",
+                "资质安心说明": "30-55岁｜男女不限｜资深中产/品质银发｜医疗器械类产品购买前先看资质",
+                "薄荷口感体验": "20-35岁｜女性为主｜精致女性/悦己青年｜在意口感清新和日常坚持体验",
+                "家庭备用复购": "30-55岁｜男女不限｜小镇中坚/实惠大众｜家庭多人或周期使用，需要备用更方便",
+            }
+            return mapping.get(name, theme["audience"])
+        if "含漱" in product_text:
+            mapping = {
+                "日常口腔护理": "20-40岁｜男女不限｜悦己青年/平价青年｜饭后、刷牙后想多一步口腔护理",
+                "正畸人群护理": "18-35岁｜男女不限｜精致女性/悦己青年｜正畸期间清洁步骤更多，需要便捷护理",
+                "家庭备用护理": "30-55岁｜男女不限｜小镇中坚/实惠大众｜家里常备口腔护理用品，方便多人使用",
+                "饭后清爽护理": "20-40岁｜男女不限｜都市型男/悦己青年｜午餐后、约会前、通勤时在意口腔状态",
+                "出行便携护理": "20-40岁｜男女不限｜都市型男/悦己青年｜出差旅行或外出时需要随手护理",
+                "成分信息透明": "25-45岁｜女性为主｜精致女性/资深中产｜购买前想看清成分、规格和资质",
+                "使用步骤清晰": "20-45岁｜男女不限｜平价青年/实惠大众｜第一次购买，需要用法简单明了",
+                "规格组合清楚": "25-50岁｜男女不限｜实惠大众/小镇中坚｜按家庭人数和使用频率选择瓶数组合",
+                "资质安心说明": "30-55岁｜男女不限｜资深中产/品质银发｜医疗器械类口腔产品先看资质再买",
+                "温和口感体验": "20-40岁｜女性为主｜精致女性/悦己青年｜在意入口感受和日常使用舒适度",
+            }
+            return mapping.get(name, theme["audience"])
+        fallback_labels = ["精致女性", "悦己青年", "小镇新贵", "小镇中坚", "资深中产", "都市型男", "实惠大众", "品质银发", "平价青年", "简朴银发"]
+        return f"20-50岁｜男女不限｜{fallback_labels[(index - 1) % len(fallback_labels)]}｜{theme['audience']}"
+
+    def _consumer_selling_point(self, theme: dict[str, str]) -> str:
+        if theme.get("hero"):
+            return self._short_text(theme["hero"], 32)
+        mapping = {
+            "日常口腔护理": "日常护理多一步",
+            "正畸人群护理": "正畸清洁更方便",
+            "家庭备用护理": "家庭常备更省心",
+            "饭后清爽护理": "饭后口腔更清爽",
+            "出行便携护理": "出门也能随手护理",
+            "成分信息透明": "成分规格看得清",
+            "使用步骤清晰": "使用步骤更简单",
+            "规格组合清楚": "瓶数组合好选择",
+            "资质安心说明": "资质信息清楚可查",
+            "温和口感体验": "口感温和更好坚持",
+        }
+        return mapping.get(theme["name"], self._short_text(theme["name"], 32))
+
+    def _consumer_choice_reason(self, theme: dict[str, str]) -> str:
+        if theme.get("buy_point"):
+            return self._short_text(theme["buy_point"], 48)
+        mapping = {
+            "日常口腔护理": "想在刷牙后、饭后补充口腔护理",
+            "正畸人群护理": "正畸期间清洁麻烦，需要更方便的护理补充",
+            "家庭备用护理": "家里多人可用，日常备用不慌",
+            "饭后清爽护理": "饭后、社交前想保持口腔状态",
+            "出行便携护理": "外出时也想保持护理习惯",
+            "成分信息透明": "买前想知道成分、规格和资质",
+            "使用步骤清晰": "不想研究复杂用法，照着步骤用更安心",
+            "规格组合清楚": "想按预算和使用频率选合适组合",
+            "资质安心说明": "医疗器械类产品，先看资质再下单",
+            "温和口感体验": "入口体验舒服，日常更容易坚持",
+        }
+        return mapping.get(theme["name"], self._short_text(theme["pain"], 48))
+
+    def _consumer_problem(self, theme: dict[str, str]) -> str:
+        mapping = {
+            "牙齿敏感护理": "冷热酸甜刺激时牙齿敏感",
+            "牙本质小管原理": "不知道脱敏产品为什么有用",
+            "牙龈出血关注": "刷牙时牙龈状态不稳定",
+            "牙菌斑管理": "日常清洁后仍担心牙菌斑",
+            "配方成分透明": "担心成分不清楚、信息不透明",
+            "居家日用步骤": "不知道怎么用、什么时候用",
+            "规格组合选择": "不知道买几支更合适",
+            "资质安心说明": "担心医疗器械资质不清楚",
+            "薄荷口感体验": "担心口感不好、难坚持",
+            "家庭备用复购": "家庭多人使用容易断货",
+        }
+        return mapping.get(theme["name"], self._short_text(theme["pain"], 48))
+
+    def _why_this_product_reason(self, theme: dict[str, str], fields: dict[str, Any]) -> str:
+        product_text = self._positioning_text(fields)
+        spec = as_text(fields.get("规格/型号/数量"))
+        if self._is_desensitizing_toothpaste(fields):
+            mapping = {
+                "牙齿敏感护理": "脱敏膏定位明确，120g/支，适合牙敏感护理测试",
+                "牙本质小管原理": "有生物活性玻璃、氯化锶、氟化钠等成分信息可讲清原理",
+                "牙龈出血关注": "可宣传范围覆盖牙龈出血相关护理，需按说明书口径表达",
+                "牙菌斑管理": "可宣传范围包含牙菌斑管理，和普通牙膏形成区分",
+                "配方成分透明": "成分表完整，适合做成分透明和理性购买方向",
+                "居家日用步骤": "膏体形态接近日常刷牙习惯，使用门槛低",
+                "规格组合选择": "1支到5支组合覆盖尝试、复购和家庭备用",
+                "资质安心说明": "医疗器械属性和资质图可作为信任背书",
+                "薄荷口感体验": "薄荷油、薄荷脑、留兰香油支撑清新口感表达",
+                "家庭备用复购": "价格带和多支组合适合做家庭备用/周期复购",
+            }
+            return mapping.get(theme["name"], self._short_text(theme["trust"], 64))
+        if "含漱" in product_text:
+            mapping = {
+                "日常口腔护理": f"{spec}规格清楚，适合日常刷牙后补充护理",
+                "正畸人群护理": "含漱液形态使用方便，适合正畸清洁后的补充护理",
+                "家庭备用护理": "瓶装规格适合家庭洗漱台常备",
+                "饭后清爽护理": "使用动作简单，适合饭后快速护理",
+                "出行便携护理": "产品形态清楚，适合外出护理场景测试",
+                "成分信息透明": "有成分、规格和资质信息可做信任解释",
+                "使用步骤清晰": "使用步骤可视化，降低首次购买理解成本",
+                "规格组合清楚": "SKU组合清楚，便于按家庭用量选择",
+                "资质安心说明": "医疗器械属性和资质图可提高信任",
+                "温和口感体验": "口感体验可作为日常坚持理由",
+            }
+            return mapping.get(theme["name"], self._short_text(theme["trust"], 64))
+        return self._short_text(theme["trust"], 64)
 
     @staticmethod
     def _short_text(text: str, max_len: int = 80) -> str:
