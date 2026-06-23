@@ -628,7 +628,7 @@ class ProductionGenerator:
                     "款式编码": product_id,
                     "标准产品名称": product_name,
                     "人群": self._consumer_persona(theme, fields, index),
-                    "场景": theme["scene"],
+                    "场景": self._consumer_usage_scene(theme, fields),
                     "卖点": self._consumer_selling_point(theme),
                     "消费者选择的原因": self._consumer_choice_reason(theme),
                     "产品解决了什么问题": self._consumer_problem(theme),
@@ -675,6 +675,38 @@ class ProductionGenerator:
             return mapping.get(name, theme["audience"])
         fallback_labels = ["精致女性", "悦己青年", "小镇新贵", "小镇中坚", "资深中产", "都市型男", "实惠大众", "品质银发", "平价青年", "简朴银发"]
         return f"20-50岁｜男女不限｜{fallback_labels[(index - 1) % len(fallback_labels)]}｜{theme['audience']}"
+
+    def _consumer_usage_scene(self, theme: dict[str, str], fields: dict[str, Any]) -> str:
+        product_text = self._positioning_text(fields)
+        if self._is_desensitizing_toothpaste(fields):
+            mapping = {
+                "牙齿敏感护理": "早晚刷牙时，遇到冷饮、热饮、酸甜食物前后",
+                "牙本质小管原理": "反复牙敏感后，购买前想弄清楚为什么要用脱敏膏",
+                "牙龈出血关注": "早晚刷牙时发现牙龈出血，想换更针对的口腔护理产品",
+                "牙菌斑管理": "饭后或睡前清洁后，仍想加强牙菌斑管理",
+                "配方成分透明": "下单前对比同类产品时，重点查看成分和资质",
+                "居家日用步骤": "家里洗漱台前，早晚按固定步骤做口腔护理",
+                "规格组合选择": "第一次尝试买1支，复购或家庭备用时买多支组合",
+                "资质安心说明": "购买医疗器械类口腔产品前，先确认注册证和说明书信息",
+                "薄荷口感体验": "早上出门前或晚上刷牙后，希望口感清新、容易坚持",
+                "家庭备用复购": "家庭多人共用或周期护理，浴室柜里常备几支",
+            }
+            return mapping.get(theme["name"], theme["scene"])
+        if "含漱" in product_text:
+            mapping = {
+                "日常口腔护理": "早晚刷牙后、饭后、出门前，想补充一步口腔护理",
+                "正畸人群护理": "戴牙套或保持器期间，刷牙清洁后做补充护理",
+                "家庭备用护理": "家庭洗漱台或收纳柜常备，家人按需使用",
+                "饭后清爽护理": "午饭后、约会前、开会前，想快速整理口腔状态",
+                "出行便携护理": "出差、旅行、通勤途中，需要在外保持口腔护理习惯",
+                "成分信息透明": "购买前对比同类口腔护理产品，想看清成分和规格",
+                "使用步骤清晰": "第一次购买后，在家按说明完成使用步骤",
+                "规格组合清楚": "按家庭人数、使用频率和预算选择瓶数组合",
+                "资质安心说明": "下单前确认资质、标签和说明书信息",
+                "温和口感体验": "早晚使用时，在意入口感受和日常坚持体验",
+            }
+            return mapping.get(theme["name"], theme["scene"])
+        return theme["scene"]
 
     def _consumer_selling_point(self, theme: dict[str, str]) -> str:
         if theme.get("hero"):
@@ -965,7 +997,7 @@ class ProductionGenerator:
                 "name": "牙本质小管原理",
                 "style": "原理科普",
                 "audience": "关注脱敏原理、购买前会看成分和说明的人群",
-                "scene": "详情页原理说明、主图卖点拆解",
+                "scene": "反复牙敏感后，购买前想弄清楚为什么要用脱敏膏",
                 "pain": "不知道脱敏膏为什么适合牙齿敏感护理，需要看懂作用路径",
                 "angle": "从牙本质小管封闭逻辑解释产品定位，避免夸张疗效承诺",
                 "trust": "用说明书、资质信息和成分表支持，不使用实验结论夸大",
@@ -1004,7 +1036,7 @@ class ProductionGenerator:
                 "name": "配方成分透明",
                 "style": "成分科普",
                 "audience": "购买前会看配方成分、规格和资质的人群",
-                "scene": "成分说明、详情页卖点拆解、信任背书模块",
+                "scene": "下单前对比同类产品时，重点查看成分和资质",
                 "pain": "医疗器械类口腔产品选择时，需要看清成分与信息来源",
                 "angle": "展示生物活性玻璃、氯化锶、氟化钠、β-葡聚糖等成分信息，不夸大含量和效果",
                 "trust": "成分来自产品资料，具体信息以标签、说明书和资质文件为准",
