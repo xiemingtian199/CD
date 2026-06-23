@@ -34,7 +34,7 @@ THEME_LIBRARY = [
         "audience": "牙齿矫正、佩戴牙套或保持器的人群",
         "scene": "正畸期间的居家口腔护理",
         "pain": "正畸期间口腔清洁步骤更多，需要清晰、方便的护理用品",
-        "angle": "强调正畸护理场景和便捷含漱，不使用治疗承诺",
+        "angle": "强调正畸护理场景和便捷护理动作，不使用治疗承诺",
         "trust": "规格、成分、适用范围清晰展示",
         "promo": "组合装价格测试",
         "visual_style": "正畸护理专业风",
@@ -101,7 +101,7 @@ THEME_LIBRARY = [
     {
         "name": "使用步骤清晰",
         "style": "教程说明",
-        "audience": "第一次购买或不熟悉含漱类产品的人群",
+        "audience": "第一次购买或不熟悉该类口腔护理产品的人群",
         "scene": "使用教程图、详情页步骤说明、短视频口播",
         "pain": "用户不知道什么时候用、怎么用、注意什么",
         "angle": "用步骤图降低理解成本，强调按说明书合理使用",
@@ -123,7 +123,7 @@ THEME_LIBRARY = [
         "promo": "SKU组合转化测试",
         "visual_style": "电商SKU转化风",
         "palette": "白色、浅灰、价格标签红少量点缀",
-        "composition": "1瓶/2瓶/3瓶阶梯陈列+SKU卡片+购买选择对比",
+        "composition": "不同SKU组合阶梯陈列+SKU卡片+购买选择对比",
         "texture": "转化导向、信息密度中等、货架感清楚",
     },
     {
@@ -163,27 +163,27 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
     "方图": [
         {
             "purpose": "首屏产品识别",
-            "main": "含氟口腔含漱液",
-            "sub": "用产品核心属性做首屏点击点，补充“二类医疗器械/资质可查/200ml规格”等背书角标，真实瓶身与包装正面展示。",
-            "visual": "电商主图构图，产品居中偏大，浅色干净背景；右侧放主标题，旁边点缀2-3个小图标卖点：含氟配方、200ml/瓶、资质信息可查。底部可放简洁规格条。",
+            "main": "{product_name}",
+            "sub": "用当前产品名称和核心属性做首屏点击点，补充“二类医疗器械/资质可查/{spec}”等背书角标，真实产品与包装正面展示。",
+            "visual": "电商主图构图，产品居中偏大，浅色干净背景；右侧放主标题，旁边点缀2-3个小图标卖点：核心信息、规格信息、资质信息可查。底部可放简洁规格条。",
         },
         {
             "purpose": "场景痛点引入",
-            "main": "饭后口腔不清爽？",
-            "sub": "用消费者日常痛点引导点击，解释为什么在饭后、通勤、办公场景使用含漱护理，不出现疗效承诺。",
-            "visual": "洗漱台或办公室洗手区场景，产品放在前景；画面用小图标表达饭后、出门前、办公午休三个使用场景，配少量信息卡说明“口腔护理多一步”。",
+            "main": "日常护理多一步",
+            "sub": "用消费者日常护理痛点引导点击，解释为什么在当前场景选择这个产品，不出现疗效承诺。",
+            "visual": "洗漱台、居家护理或办公室洗手区场景，产品放在前景；画面用小图标表达使用场景，配少量信息卡说明“口腔护理多一步”。",
         },
         {
             "purpose": "规格与SKU说明",
-            "main": "1瓶/2瓶/3瓶可选",
+            "main": "{sku_detail}可选",
             "sub": "把购买选择说清楚，突出家庭备用、周期使用、组合更清楚等购买理由，减少SKU疑虑，避免低价误导。",
-            "visual": "产品瓶身与1瓶、2瓶、3瓶组合阶梯式陈列；旁边用对比信息块说明“尝鲜装/家庭备用/多人共享”等场景，不出现虚假优惠和最低价承诺。",
+            "visual": "产品与SKU组合阶梯式陈列；旁边用对比信息块说明“尝鲜装/家庭备用/多人共享”等场景，不出现虚假优惠和最低价承诺。",
         },
         {
             "purpose": "使用步骤说明",
-            "main": "含漱护理更方便",
-            "sub": "把买点落在使用便利性上，说明使用门槛低、步骤清楚、适合日常场景，用步骤图表达护理流程，强调阅读说明书和合理使用。",
-            "visual": "三步流程信息图：取用、含漱、收纳；每一步用图标和短标签表达，产品主体在左侧，右侧是流程卡片，整体像专业电商卖点图。",
+            "main": "使用步骤更清楚",
+            "sub": "把买点落在使用便利性上，说明步骤清楚、适合日常场景，用步骤图表达护理流程，强调阅读说明书和合理使用。",
+            "visual": "三步流程信息图：取用、按说明使用、收纳；每一步用图标和短标签表达，产品主体在左侧，右侧是流程卡片，整体像专业电商卖点图。",
         },
         {
             "purpose": "资质与信任背书",
@@ -196,24 +196,24 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
         {
             "purpose": "竖版首屏",
             "main": "口腔护理多一步",
-            "sub": "产品大图+核心场景，一屏看懂购买理由。",
+            "sub": "{product_name}大图+核心场景，一屏看懂购买理由。",
             "visual": "竖版海报，上半部分场景，下半部分产品和卖点，留白充足。",
         },
         {
             "purpose": "人群场景",
-            "main": "正畸/饭后/居家都好放",
+            "main": "正畸/居家/出行都好放",
             "sub": "用真实生活场景表达适用场景，不制造焦虑。",
             "visual": "竖版生活方式图，人物只作场景辅助，产品保持清晰露出。",
         },
         {
             "purpose": "卖点拆解",
-            "main": "含氟配方 200ml/瓶",
-            "sub": "信息模块化展示核心卖点，避免堆字。",
+            "main": "{spec} 规格清楚",
+            "sub": "信息模块化展示当前产品核心卖点，避免堆字。",
             "visual": "竖版信息卡布局，3个卖点模块，配产品图和浅色背景。",
         },
         {
             "purpose": "步骤教程",
-            "main": "倒出-含漱-吐出",
+            "main": "按说明合理使用",
             "sub": "用步骤型买点承接内容流。",
             "visual": "竖版教程图，步骤编号清晰，动作示意克制，不出现口腔病灶画面。",
         },
@@ -247,7 +247,7 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
             "purpose": "使用方法",
             "main": "按说明合理使用",
             "sub": "步骤化表达，降低理解成本，并和本链接场景结合。",
-            "visual": "详情页第4屏，三步使用流程或时间线，突出含漱、用量/频次以说明书为准、使用后收纳等动作。",
+            "visual": "详情页第4屏，三步使用流程或时间线，突出取用、用量/频次以说明书为准、使用后收纳等动作。",
         },
         {
             "purpose": "规格资质信任",
@@ -265,13 +265,13 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
     "笔记图": [
         {
             "purpose": "种草封面",
-            "main": "饭后口腔护理好物",
+            "main": "日常口腔护理好物",
             "sub": "真实分享感，避免功效承诺。",
             "visual": "小红书笔记封面风格，产品+洗漱台+手写感标签。",
         },
         {
             "purpose": "场景分享",
-            "main": "出门前含漱一下",
+            "main": "出门前护理一下",
             "sub": "强调使用时机和便利感。",
             "visual": "生活方式拼图，产品、包包、洗漱台细节组合。",
         },
@@ -443,16 +443,20 @@ class ProductionGenerator:
             task_updates.append(
                 {
                     "record_id": record_id,
-                    "fields": self._task_content_fields(
-                        fields=product_fields,
-                        theme_id=theme_id,
-                        theme=theme,
-                        link_index=int(as_number(fields.get("链接序号")) or 1),
-                        asset_type=asset_type,
-                        seq=seq,
-                        size=as_text(fields.get("图片尺寸")),
-                        task_id=as_text(fields.get("任务ID")),
-                    ),
+                    "fields": {
+                        **self._task_content_fields(
+                            fields=product_fields,
+                            theme_id=theme_id,
+                            theme=theme,
+                            link_index=int(as_number(fields.get("链接序号")) or 1),
+                            asset_type=asset_type,
+                            seq=seq,
+                            size=as_text(fields.get("图片尺寸")),
+                            task_id=as_text(fields.get("任务ID")),
+                        ),
+                        "产品参考图路径": self._product_reference_path(product_fields),
+                        "参考素材使用方式": "本次生图参考图优先使用产品白底图，保证主体真实一致；暂不使用参考素材池。",
+                    },
                 }
             )
         updated = 0
@@ -471,7 +475,15 @@ class ProductionGenerator:
     def _title(self, fields: dict[str, Any]) -> str:
         product_name = as_text(fields.get("标准产品名称"))
         spec = as_text(fields.get("规格/型号/数量"))
-        return f"{product_name} {spec} 日常口腔护理含漱液".strip()
+        return f"{product_name} {spec} 日常口腔护理".strip()
+
+    @staticmethod
+    def _product_reference_path(fields: dict[str, Any]) -> str:
+        return (
+            as_text(fields.get("白底图文件夹"))
+            or as_text(fields.get("产品实拍文件夹"))
+            or as_text(fields.get("透明底图文件夹"))
+        )
 
     def _compliance_note(self, fields: dict[str, Any], platform_requirements: str) -> str:
         notes = [
@@ -543,10 +555,10 @@ class ProductionGenerator:
                         ),
                         "关联SKU": as_text(fields.get("SKU明细")) if asset_type == "SKU图" else "",
                         "引用资质": as_text(fields.get("注册证/资质文件夹")) if asset_type in {"资质图", "详情页"} else "",
-                        "产品参考图路径": as_text(fields.get("产品实拍文件夹")),
+                        "产品参考图路径": self._product_reference_path(fields),
                         "场景参考图路径": "",
                         "匹配参考素材ID": "",
-                        "参考素材使用方式": "本次测试暂不使用参考素材池，先按主题方向和产品实拍图生成。",
+                        "参考素材使用方式": "本次生图参考图优先使用产品白底图，保证主体真实一致；暂不使用参考素材池。",
                         "ChatGPT对话批次": self._chat_batch(asset_type),
                         "建议单轮生成数量": 1 if asset_type in {"详情页", "SKU图", "资质图", "产品视频"} else 2,
                         "输出文件名": f"{task_id}.png" if asset_type != "产品视频" else f"{task_id}.mp4",
@@ -659,7 +671,7 @@ class ProductionGenerator:
     def _theme_from_fields(self, fields: dict[str, Any]) -> dict[str, str]:
         name = as_text(fields.get("主题名称"))
         defaults = THEME_BY_NAME.get(name, {})
-        return {
+        theme = {
             "name": name,
             "style": as_text(fields.get("主题风格")) or defaults.get("style", ""),
             "audience": as_text(fields.get("目标人群")) or defaults.get("audience", ""),
@@ -673,6 +685,7 @@ class ProductionGenerator:
             "composition": as_text(fields.get("推荐构图")) or defaults.get("composition", ""),
             "texture": as_text(fields.get("画面质感")) or defaults.get("texture", ""),
         }
+        return {key: self._clean_legacy_product_terms(value) for key, value in theme.items()}
 
     def _variant(self, asset_type: str, seq: int) -> dict[str, str]:
         variants = ASSET_VARIANTS.get(asset_type, [])
@@ -686,15 +699,34 @@ class ProductionGenerator:
         }
 
     def _format_variant(self, template: str, asset_type: str, theme: dict[str, str], fields: dict[str, Any]) -> str:
-        return template.format(
-            asset_type=asset_type,
-            theme_name=theme.get("name", ""),
-            audience=theme.get("audience", ""),
-            scene=theme.get("scene", ""),
-            angle=theme.get("angle", ""),
-            product_name=as_text(fields.get("标准产品名称")),
-            spec=as_text(fields.get("规格/型号/数量")),
+        return self._clean_legacy_product_terms(
+            template.format(
+                asset_type=asset_type,
+                theme_name=theme.get("name", ""),
+                audience=theme.get("audience", ""),
+                scene=theme.get("scene", ""),
+                angle=theme.get("angle", ""),
+                product_name=as_text(fields.get("标准产品名称")),
+                spec=as_text(fields.get("规格/型号/数量")),
+                sku_detail=as_text(fields.get("SKU明细")) or as_text(fields.get("规格/型号/数量")),
+            )
         )
+
+    @staticmethod
+    def _clean_legacy_product_terms(text: str) -> str:
+        replacements = {
+            "含漱类产品": "该类口腔护理产品",
+            "便捷含漱": "便捷护理动作",
+            "含漱护理": "口腔护理",
+            "含漱": "按说明使用",
+            "含氟": "核心属性",
+            "200ml/瓶": "规格信息",
+            "口腔含漱液": "口腔护理产品",
+        }
+        cleaned = as_text(text)
+        for source, target in replacements.items():
+            cleaned = cleaned.replace(source, target)
+        return cleaned
 
     def _main_copy(self, asset_type: str, seq: int, theme: dict[str, str], fields: dict[str, Any]) -> str:
         if asset_type == "资质图":
@@ -745,7 +777,7 @@ class ProductionGenerator:
         )
         ecommerce_layout_rule = (
             "请按电商主图思路设计：产品主体必须最大最清晰；主标题负责点击；"
-            "画面需补充2-3个短卖点或背书角标，例如含氟配方、200ml规格、资质可查、按说明使用；"
+            "画面需补充2-3个短卖点或背书角标，例如核心成分/核心属性、规格信息、资质可查、按说明使用；"
             "同时解释该场景为什么需要这个产品、产品解决什么护理需求、给用户带来什么选择好处。"
             "如使用“二类医疗器械”等背书，只能作为资质信息角标表达，并保持“信息以资质/说明书为准”的稳妥口径。"
         )
@@ -788,7 +820,8 @@ class ProductionGenerator:
             ),
             4: (
                 "详情页第4屏专属要求：做使用方法页。"
-                "必须用步骤、时间线或流程图表达使用动作，并提醒按说明合理使用；不要把它画成卖点海报、资质页或品牌页。"
+                "必须用步骤、时间线或流程图表达使用动作，并提醒按说明合理使用；使用动作必须匹配当前产品剂型，不要套用其他产品的使用方式。"
+                "不要把它画成卖点海报、资质页或品牌页。"
                 "上下边缘要延续前后页色调，让第3屏到第5屏衔接自然。"
             ),
             5: (
