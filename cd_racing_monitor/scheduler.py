@@ -43,6 +43,7 @@ def main() -> None:
     parser.add_argument("--generate-creative-briefs", action="store_true", help="根据宣传方向库生成每个方向5张主图文案和画面描述")
     parser.add_argument("--setup-100-link-plan", action="store_true", help="创建每日100链接生产计划表并生成交接文档")
     parser.add_argument("--generate-production-plan", action="store_true", help="根据产品素材资料库生成链接主题和素材生产任务")
+    parser.add_argument("--refresh-production-themes", action="store_true", help="根据产品资料刷新已生成的链接主题规划")
     parser.add_argument("--refresh-production-tasks", action="store_true", help="刷新已生成素材任务的文案、画面描述和生图提示词")
     parser.add_argument("--production-product-limit", type=int, default=5, help="生成生产计划时最多读取多少个产品")
     parser.add_argument("--production-plan-doc", default="outputs/100链接日更生产计划.md", help="每日100链接生产计划 Markdown 输出路径")
@@ -191,6 +192,11 @@ def main() -> None:
             result.created_tasks,
             result.created_risks,
         )
+        return
+
+    if args.refresh_production_themes:
+        updated = ProductionGenerator(load_config(), logger).refresh_themes()
+        logger.info("链接主题规划已刷新：更新 %s 条。", updated)
         return
 
     if args.refresh_production_tasks:

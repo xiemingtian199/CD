@@ -158,19 +158,82 @@ THEME_LIBRARY = [
 
 THEME_BY_NAME = {theme["name"]: theme for theme in THEME_LIBRARY}
 
+DEFAULT_VISUAL_SYSTEMS = [
+    {
+        "visual_style": "天猫清爽医护风",
+        "palette": "白色、浅薄荷绿、浅蓝点缀",
+        "composition": "中心产品大图+右侧卖点信息卡+底部规格条",
+        "texture": "干净留白、轻医疗感、高清棚拍",
+    },
+    {
+        "visual_style": "专业原理科普风",
+        "palette": "白色、浅蓝、银灰点缀",
+        "composition": "产品前景+原理信息卡+局部放大示意",
+        "texture": "理性克制、线条清晰、轻科普感",
+    },
+    {
+        "visual_style": "家庭生活温和风",
+        "palette": "暖白、浅木色、柔和橙色点缀",
+        "composition": "居家洗漱台场景+产品陈列+人群提醒卡",
+        "texture": "温暖真实、居家收纳感、自然光",
+    },
+    {
+        "visual_style": "症状关注稳妥风",
+        "palette": "白色、浅灰、低饱和红色点缀",
+        "composition": "产品大图+困扰提示卡+说明书口径角标",
+        "texture": "专业可信、不过度刺激、不制造焦虑",
+    },
+    {
+        "visual_style": "成分透明科普风",
+        "palette": "白色、浅青绿、实验室透明感点缀",
+        "composition": "产品+成分信息模块+简洁分子/水滴图标",
+        "texture": "清透、专业、信息可读性强",
+    },
+    {
+        "visual_style": "教程步骤插画风",
+        "palette": "白色、浅蓝、柔和绿色",
+        "composition": "三步流程横向或环形排列+产品固定在画面一侧",
+        "texture": "说明书友好、图标化、步骤清楚",
+    },
+    {
+        "visual_style": "电商SKU转化风",
+        "palette": "白色、浅灰、价格标签红少量点缀",
+        "composition": "不同SKU组合阶梯陈列+SKU卡片+购买选择对比",
+        "texture": "转化导向、信息密度中等、货架感清楚",
+    },
+    {
+        "visual_style": "资质背书稳重风",
+        "palette": "白色、深蓝、银灰点缀",
+        "composition": "产品+资质文件局部+背书徽章矩阵",
+        "texture": "稳重可信、证照展示感、商务清晰",
+    },
+    {
+        "visual_style": "薄荷清新体验风",
+        "palette": "白色、薄荷绿、清透水感蓝",
+        "composition": "产品+清新口感元素+体验短标签",
+        "texture": "清新水润、轻生活方式、柔和不医疗化",
+    },
+    {
+        "visual_style": "复购囤货清楚风",
+        "palette": "白色、浅灰、温和黄色点缀",
+        "composition": "多SKU陈列+购买理由卡+家庭备用场景",
+        "texture": "货架清楚、选择成本低、信息不过载",
+    },
+]
+
 
 ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
     "方图": [
         {
             "purpose": "首屏产品识别",
-            "main": "{product_name}",
-            "sub": "用当前产品名称和核心属性做首屏点击点，补充“二类医疗器械/资质可查/{spec}”等背书角标，真实产品与包装正面展示。",
+            "main": "{hero}",
+            "sub": "用当前产品的核心卖点做首屏点击点，补充“二类医疗器械/资质可查/{spec}”等背书角标，真实产品与包装正面展示。",
             "visual": "电商主图构图，产品居中偏大，浅色干净背景；右侧放主标题，旁边点缀2-3个小图标卖点：核心信息、规格信息、资质信息可查。底部可放简洁规格条。",
         },
         {
             "purpose": "场景痛点引入",
-            "main": "日常护理多一步",
-            "sub": "用消费者日常护理痛点引导点击，解释为什么在当前场景选择这个产品，不出现疗效承诺。",
+            "main": "{buy_point}",
+            "sub": "用消费者真实买点引导点击，解释为什么在当前场景选择这个产品，不出现疗效承诺。",
             "visual": "洗漱台、居家护理或办公室洗手区场景，产品放在前景；画面用小图标表达使用场景，配少量信息卡说明“口腔护理多一步”。",
         },
         {
@@ -182,7 +245,7 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
         {
             "purpose": "使用步骤说明",
             "main": "使用步骤更清楚",
-            "sub": "把买点落在使用便利性上，说明步骤清楚、适合日常场景，用步骤图表达护理流程，强调阅读说明书和合理使用。",
+            "sub": "把买点落在使用便利性上，说明步骤清楚、适合当前产品场景，用步骤图表达护理流程，强调阅读说明书和合理使用。",
             "visual": "三步流程信息图：取用、按说明使用、收纳；每一步用图标和短标签表达，产品主体在左侧，右侧是流程卡片，整体像专业电商卖点图。",
         },
         {
@@ -195,19 +258,19 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
     "长图": [
         {
             "purpose": "竖版首屏",
-            "main": "口腔护理多一步",
+            "main": "{hero}",
             "sub": "{product_name}大图+核心场景，一屏看懂购买理由。",
             "visual": "竖版海报，上半部分场景，下半部分产品和卖点，留白充足。",
         },
         {
             "purpose": "人群场景",
-            "main": "正畸/居家/出行都好放",
+            "main": "{buy_point}",
             "sub": "用真实生活场景表达适用场景，不制造焦虑。",
             "visual": "竖版生活方式图，人物只作场景辅助，产品保持清晰露出。",
         },
         {
             "purpose": "卖点拆解",
-            "main": "{spec} 规格清楚",
+            "main": "{proof_points}",
             "sub": "信息模块化展示当前产品核心卖点，避免堆字。",
             "visual": "竖版信息卡布局，3个卖点模块，配产品图和浅色背景。",
         },
@@ -265,13 +328,13 @@ ASSET_VARIANTS: dict[str, list[dict[str, str]]] = {
     "笔记图": [
         {
             "purpose": "种草封面",
-            "main": "日常口腔护理好物",
+            "main": "{hero}",
             "sub": "真实分享感，避免功效承诺。",
             "visual": "小红书笔记封面风格，产品+洗漱台+手写感标签。",
         },
         {
             "purpose": "场景分享",
-            "main": "出门前护理一下",
+            "main": "{buy_point}",
             "sub": "强调使用时机和便利感。",
             "visual": "生活方式拼图，产品、包包、洗漱台细节组合。",
         },
@@ -347,44 +410,21 @@ class ProductionGenerator:
             platform = as_text(fields.get("平台")) or "全平台"
             target_count = int(as_number(fields.get("每日目标链接数")) or 10)
             sku_count = int(as_number(fields.get("SKU数量")) or 0)
+            product_themes = self._product_themes(fields, target_count)
 
-            for index, theme in enumerate(THEME_LIBRARY[:target_count], start=1):
+            for index, theme in enumerate(product_themes, start=1):
                 theme_id = f"{product_id}-T{index:02d}"
                 if theme_id not in existing_theme_ids:
                     theme_rows.append(
-                        {
-                            "主题ID": theme_id,
-                            "款式编码": product_id,
-                            "标准产品名称": product_name,
-                            "商品标题（埋词）": title,
-                            "平台": platform,
-                            "链接序号": index,
-                            "主题名称": theme["name"],
-                            "主题风格": theme["style"],
-                            "视觉风格": theme["visual_style"],
-                            "色调搭配": theme["palette"],
-                            "推荐构图": theme["composition"],
-                            "画面质感": theme["texture"],
-                            "目标人群": theme["audience"],
-                            "使用场景": theme["scene"],
-                            "核心痛点": theme["pain"],
-                            "核心卖点": theme["angle"],
-                            "信任背书": theme["trust"],
-                            "价格/促销方向": theme["promo"],
-                            "需要生成方图数": 5,
-                            "需要生成长图数": 5,
-                            "需要生成详情页数": 6,
-                            "需要生成笔记图数": 3,
-                            "需要生成视频数": 1,
-                            "SKU图数量": sku_count,
-                            "基础图数量": 2,
-                            "场景图数量": 1,
-                            "资质图数量": 1,
-                            "主题合规注意事项": self._compliance_note(fields, platform_requirements),
-                            "人工确认状态": "待确认",
-                            "计划状态": "待拆任务",
-                            "生成日期": today,
-                        }
+                        self._theme_row_fields(
+                            fields=fields,
+                            theme_id=theme_id,
+                            theme=theme,
+                            index=index,
+                            sku_count=sku_count,
+                            platform_requirements=platform_requirements,
+                            timestamp=today,
+                        )
                     )
 
                 task_rows.extend(
@@ -416,6 +456,47 @@ class ProductionGenerator:
             created_risks=created_risks,
         )
 
+    def refresh_themes(self) -> int:
+        table_ids = self._table_ids()
+        platform_requirements = read_platform_requirements()
+        products = {
+            as_text(row.get("fields", {}).get("款式编码")): row.get("fields", {})
+            for row in self.client.list_records(table_ids[PRODUCT_TABLE], page_size=500)
+            if as_text(row.get("fields", {}).get("款式编码"))
+        }
+        updates: list[dict[str, Any]] = []
+        timestamp = int(datetime.now().timestamp() * 1000)
+        for row in self.client.list_records(table_ids[THEME_TABLE], page_size=500):
+            fields = row.get("fields", {})
+            product_id = as_text(fields.get("款式编码"))
+            product_fields = products.get(product_id)
+            if not product_fields:
+                continue
+            theme_id = as_text(fields.get("主题ID"))
+            index = int(as_number(fields.get("链接序号")) or self._theme_index(theme_id) or 1)
+            target_count = int(as_number(product_fields.get("每日目标链接数")) or 10)
+            product_themes = self._product_themes(product_fields, target_count)
+            if not (1 <= index <= len(product_themes)):
+                continue
+            updates.append(
+                {
+                    "record_id": as_text(row.get("record_id")),
+                    "fields": self._theme_row_fields(
+                        fields=product_fields,
+                        theme_id=theme_id,
+                        theme=product_themes[index - 1],
+                        index=index,
+                        sku_count=int(as_number(product_fields.get("SKU数量")) or 0),
+                        platform_requirements=platform_requirements,
+                        timestamp=timestamp,
+                    ),
+                }
+            )
+        updated = 0
+        for index in range(0, len(updates), 100):
+            updated += self.client.update_records_batch(table_ids[THEME_TABLE], updates[index : index + 100])
+        return updated
+
     def refresh_tasks(self) -> int:
         table_ids = self._table_ids()
         products = {
@@ -440,6 +521,8 @@ class ProductionGenerator:
             theme = themes.get(theme_id)
             if not record_id or not product_fields or not theme:
                 continue
+            link_index = int(as_number(fields.get("链接序号")) or self._theme_index(theme_id) or 1)
+            theme = self._theme_for_product_index(product_fields, link_index, theme)
             task_updates.append(
                 {
                     "record_id": record_id,
@@ -448,7 +531,7 @@ class ProductionGenerator:
                             fields=product_fields,
                             theme_id=theme_id,
                             theme=theme,
-                            link_index=int(as_number(fields.get("链接序号")) or 1),
+                            link_index=link_index,
                             asset_type=asset_type,
                             seq=seq,
                             size=as_text(fields.get("图片尺寸")),
@@ -464,6 +547,15 @@ class ProductionGenerator:
             updated += self.client.update_records_batch(table_ids[TASK_TABLE], task_updates[index : index + 100])
         return updated
 
+    def _theme_for_product_index(
+        self, product_fields: dict[str, Any], link_index: int, fallback: dict[str, str]
+    ) -> dict[str, str]:
+        target_count = int(as_number(product_fields.get("每日目标链接数")) or 10)
+        themes = self._product_themes(product_fields, target_count)
+        if 1 <= link_index <= len(themes):
+            return themes[link_index - 1]
+        return fallback
+
     def _table_ids(self) -> dict[str, str]:
         existing = {table_name(item): table_id(item) for item in self.client.list_tables()}
         required = (PRODUCT_TABLE, THEME_TABLE, TASK_TABLE, RISK_TABLE)
@@ -475,7 +567,176 @@ class ProductionGenerator:
     def _title(self, fields: dict[str, Any]) -> str:
         product_name = as_text(fields.get("标准产品名称"))
         spec = as_text(fields.get("规格/型号/数量"))
-        return f"{product_name} {spec} 日常口腔护理".strip()
+        title_terms = self._product_title_terms(fields)
+        return " ".join(part for part in [product_name, spec, title_terms] if part).strip()
+
+    def _product_title_terms(self, fields: dict[str, Any]) -> str:
+        text = self._product_text(fields)
+        if "脱敏" in text or "牙本质小管" in text:
+            return "牙齿敏感护理 牙龈护理"
+        if "含漱" in text:
+            return "日常口腔护理"
+        return "口腔护理"
+
+    @staticmethod
+    def _product_text(fields: dict[str, Any]) -> str:
+        keys = ("标准产品名称", "产品类目", "基础卖点", "材质/成分", "可宣传范围", "适用人群", "适用场景")
+        return "\n".join(as_text(fields.get(key)) for key in keys)
+
+    def _product_themes(self, fields: dict[str, Any], target_count: int) -> list[dict[str, str]]:
+        text = self._product_text(fields)
+        if "脱敏" in text or "牙本质小管" in text or "氯化锶" in text:
+            themes = self._desensitizing_toothpaste_themes(fields)
+        else:
+            themes = [dict(theme) for theme in THEME_LIBRARY]
+        return [self._apply_visual_system(theme, index) for index, theme in enumerate(themes[:target_count])]
+
+    def _desensitizing_toothpaste_themes(self, fields: dict[str, Any]) -> list[dict[str, str]]:
+        product_name = as_text(fields.get("标准产品名称")) or "口腔护理产品"
+        spec = as_text(fields.get("规格/型号/数量"))
+        sku_detail = as_text(fields.get("SKU明细")) or spec
+        return [
+            {
+                "name": "牙齿敏感护理",
+                "style": "清爽专业",
+                "audience": "牙齿遇冷、遇热、酸甜刺激时容易敏感的人群",
+                "scene": "居家刷牙后的日常牙齿敏感护理",
+                "pain": "冷热酸甜入口时牙齿容易敏感，日常护理需要更有针对性的产品",
+                "angle": "基于注册证/说明书口径，突出封闭牙本质小管这一脱敏护理原理",
+                "trust": "商品信息以注册证、说明书、标签和资质图为准",
+                "promo": "单支低门槛测试",
+                "hero": "冷热酸甜敏感护理",
+                "buy_point": "冷热酸甜前后都要认真护理",
+                "proof_points": "牙本质小管封闭、脱敏护理、120g/支",
+            },
+            {
+                "name": "牙本质小管原理",
+                "style": "原理科普",
+                "audience": "关注脱敏原理、购买前会看成分和说明的人群",
+                "scene": "详情页原理说明、主图卖点拆解",
+                "pain": "不知道脱敏膏为什么适合牙齿敏感护理，需要看懂作用路径",
+                "angle": "从牙本质小管封闭逻辑解释产品定位，避免夸张疗效承诺",
+                "trust": "用说明书、资质信息和成分表支持，不使用实验结论夸大",
+                "promo": "原理信任测试",
+                "hero": "看懂脱敏护理原理",
+                "buy_point": "脱敏护理看得懂",
+                "proof_points": "生物活性玻璃、氯化锶、氟化钠",
+            },
+            {
+                "name": "牙龈出血关注",
+                "style": "稳妥关怀",
+                "audience": "关注牙龈出血、刷牙时牙龈状态的人群",
+                "scene": "早晚刷牙时的牙龈护理关注场景",
+                "pain": "刷牙时发现牙龈出血，想找一款信息清楚的口腔护理产品",
+                "angle": "按注册证/说明书范围表达缓解和减少牙龈出血相关护理，不做保证",
+                "trust": "涉及出血、炎症等高风险词时使用说明书口径并标注人工确认",
+                "promo": "痛点方向谨慎测试",
+                "hero": "牙龈出血护理关注",
+                "buy_point": "刷牙时的牙龈状态别忽略",
+                "proof_points": "菌斑性牙龈炎症适用范围、牙龈出血护理、说明书为准",
+            },
+            {
+                "name": "牙菌斑管理",
+                "style": "清洁管理",
+                "audience": "重视牙菌斑管理和日常口腔清洁的人群",
+                "scene": "早晚刷牙、饭后清洁后的口腔护理补充",
+                "pain": "日常清洁后仍想加强牙菌斑管理和口腔护理",
+                "angle": "围绕抑制和减少牙菌斑的注册证/说明书范围做稳妥表达",
+                "trust": "避免杀菌、消炎等高风险词，强调说明书和资质可查",
+                "promo": "清洁管理方向测试",
+                "hero": "牙菌斑管理多一步",
+                "buy_point": "日常清洁后再补一步",
+                "proof_points": "抑制和减少牙菌斑、口腔清洁管理、资质可查",
+            },
+            {
+                "name": "配方成分透明",
+                "style": "成分科普",
+                "audience": "购买前会看配方成分、规格和资质的人群",
+                "scene": "成分说明、详情页卖点拆解、信任背书模块",
+                "pain": "医疗器械类口腔产品选择时，需要看清成分与信息来源",
+                "angle": "展示生物活性玻璃、氯化锶、氟化钠、β-葡聚糖等成分信息，不夸大含量和效果",
+                "trust": "成分来自产品资料，具体信息以标签、说明书和资质文件为准",
+                "promo": "成分信任测试",
+                "hero": "成分信息清楚看",
+                "buy_point": "买前看清配方与规格",
+                "proof_points": "生物活性玻璃、氯化锶、氟化钠、β-葡聚糖",
+            },
+            {
+                "name": "居家日用步骤",
+                "style": "教程说明",
+                "audience": "第一次购买脱敏膏或不清楚使用方式的人群",
+                "scene": "居家刷牙台、早晚护理、详情页步骤说明",
+                "pain": "不知道什么时候用、怎么用、需要注意什么",
+                "angle": "用步骤图降低理解成本，提醒按说明书合理使用",
+                "trust": "使用方法以说明书为准，特殊情况先阅读说明或咨询专业人士",
+                "promo": "教程型链接测试",
+                "hero": "使用步骤更清楚",
+                "buy_point": "居家护理照着用",
+                "proof_points": "取用、刷牙/护理、收纳、说明书为准",
+            },
+            {
+                "name": "规格组合选择",
+                "style": "SKU转化",
+                "audience": "想先试用或按周期囤货的家庭用户",
+                "scene": "单支尝试、多人家庭备用、周期复购选择",
+                "pain": "不知道选1支、2支、3支还是5支，担心买错规格",
+                "angle": f"清楚展示{sku_detail}组合，减少规格理解成本",
+                "trust": "SKU、数量、价格带与上架信息保持一致，不做低价误导",
+                "promo": "SKU组合转化测试",
+                "hero": f"{sku_detail}可选",
+                "buy_point": "按使用频率选规格",
+                "proof_points": f"{sku_detail}、120g/支、组合清楚",
+            },
+            {
+                "name": "资质安心说明",
+                "style": "资质背书",
+                "audience": "重视医疗器械资质和商品信息真实性的人群",
+                "scene": "详情页资质模块、主图信任角标、购买前确认",
+                "pain": "医疗器械类产品购买前，需要确认资质、说明书和标签信息",
+                "angle": "展示注册证、说明书、标签等可核验信息，避免医生/机构背书",
+                "trust": "产品信息以资质文件、说明书和页面展示为准",
+                "promo": "信任转化测试",
+                "hero": "资质信息清楚可查",
+                "buy_point": "买前先看资质",
+                "proof_points": "注册证、说明书、标签信息",
+            },
+            {
+                "name": "薄荷口感体验",
+                "style": "体验清新",
+                "audience": "在意口感、气味和日常使用体验的人群",
+                "scene": "早晚刷牙后的清新口腔护理体验",
+                "pain": "担心口腔护理产品不好入口、体验不舒服",
+                "angle": "基于食用香精中薄荷油、薄荷脑、留兰香油等信息表达清新体验，不做效果保证",
+                "trust": "口感体验与功效表达分开，具体使用感因人而异",
+                "promo": "体验感方向测试",
+                "hero": "薄荷清新口感",
+                "buy_point": "日常使用更容易坚持",
+                "proof_points": "薄荷油、薄荷脑、留兰香油",
+            },
+            {
+                "name": "家庭备用复购",
+                "style": "家庭备用",
+                "audience": "家庭多人口腔护理、周期使用和复购人群",
+                "scene": "浴室柜、家庭洗漱台、囤货备用场景",
+                "pain": "家里多人使用或周期护理时，需要规格清楚、备用方便",
+                "angle": "用家庭备用和组合规格表达购买理由，不做低价或疗效承诺",
+                "trust": "规格、数量、SKU和售后信息清楚展示",
+                "promo": "多支组合测试",
+                "hero": "家庭备用更省心",
+                "buy_point": "多支组合按需选",
+                "proof_points": f"{sku_detail}、120g/支、家庭备用",
+            },
+        ]
+
+    @staticmethod
+    def _apply_visual_system(theme: dict[str, str], index: int) -> dict[str, str]:
+        visual = DEFAULT_VISUAL_SYSTEMS[index % len(DEFAULT_VISUAL_SYSTEMS)]
+        output = dict(theme)
+        output.setdefault("visual_style", visual["visual_style"])
+        output.setdefault("palette", visual["palette"])
+        output.setdefault("composition", visual["composition"])
+        output.setdefault("texture", visual["texture"])
+        return output
 
     @staticmethod
     def _product_reference_path(fields: dict[str, Any]) -> str:
@@ -496,6 +757,61 @@ class ProductionGenerator:
         if not platform_requirements:
             notes.append("未读取到本地平台要求文件，请先检查 E:\\CD级素材\\平台要求。")
         return "\n".join(notes)
+
+    def _theme_row_fields(
+        self,
+        fields: dict[str, Any],
+        theme_id: str,
+        theme: dict[str, str],
+        index: int,
+        sku_count: int,
+        platform_requirements: str,
+        timestamp: int,
+    ) -> dict[str, Any]:
+        product_id = as_text(fields.get("款式编码"))
+        product_name = as_text(fields.get("标准产品名称"))
+        title = as_text(fields.get("商品标题（埋词）")) or self._title(fields)
+        platform = as_text(fields.get("平台")) or "全平台"
+        return {
+            "主题ID": theme_id or f"{product_id}-T{index:02d}",
+            "款式编码": product_id,
+            "标准产品名称": product_name,
+            "商品标题（埋词）": title,
+            "平台": platform,
+            "链接序号": index,
+            "主题名称": theme["name"],
+            "主题风格": theme["style"],
+            "视觉风格": theme["visual_style"],
+            "色调搭配": theme["palette"],
+            "推荐构图": theme["composition"],
+            "画面质感": theme["texture"],
+            "目标人群": theme["audience"],
+            "使用场景": theme["scene"],
+            "核心痛点": theme["pain"],
+            "核心卖点": theme["angle"],
+            "信任背书": theme["trust"],
+            "价格/促销方向": theme["promo"],
+            "需要生成方图数": 5,
+            "需要生成长图数": 5,
+            "需要生成详情页数": 6,
+            "需要生成笔记图数": 3,
+            "需要生成视频数": 1,
+            "SKU图数量": sku_count,
+            "基础图数量": 2,
+            "场景图数量": 1,
+            "资质图数量": 1,
+            "主题合规注意事项": self._compliance_note(fields, platform_requirements),
+            "人工确认状态": "待确认",
+            "计划状态": "待拆任务",
+            "生成日期": timestamp,
+        }
+
+    @staticmethod
+    def _theme_index(theme_id: str) -> int:
+        try:
+            return int(as_text(theme_id).rsplit("T", 1)[1])
+        except (IndexError, TypeError, ValueError):
+            return 0
 
     def _task_rows(
         self,
@@ -706,6 +1022,9 @@ class ProductionGenerator:
                 audience=theme.get("audience", ""),
                 scene=theme.get("scene", ""),
                 angle=theme.get("angle", ""),
+                hero=theme.get("hero", theme.get("name", "")),
+                buy_point=theme.get("buy_point", theme.get("pain", "")),
+                proof_points=theme.get("proof_points", theme.get("angle", "")),
                 product_name=as_text(fields.get("标准产品名称")),
                 spec=as_text(fields.get("规格/型号/数量")),
                 sku_detail=as_text(fields.get("SKU明细")) or as_text(fields.get("规格/型号/数量")),
@@ -790,14 +1109,28 @@ class ProductionGenerator:
             "但产品瓶身、包装、规格和资质信息必须保持真实一致。"
         )
         detail_page_rule = self._detail_page_prompt_rule(seq, theme) if asset_type == "详情页" else ""
+        product_positioning = self._product_positioning_prompt(fields, theme)
         return (
             f"请基于上传的产品参考图生成{asset_type}第{seq}张，图片目的：{purpose}，尺寸要求：{size}。"
             f"产品：{as_text(fields.get('标准产品名称'))}；规格：{as_text(fields.get('规格/型号/数量'))}；"
             f"主题：{theme['name']}；目标人群：{theme['audience']}；使用场景：{theme['scene']}。"
+            f"{product_positioning}"
             f"画面方向：{visual}。"
             f"画面文字主标题：{main}。辅助文字参考：{sub}。{visible_text_rule}{ecommerce_layout_rule}{differentiation_rule}{detail_page_rule}"
             "要求画面真实清晰，产品主体完整突出，避免医疗化治疗承诺、绝对化词汇、夸张前后对比、医生专家背书、二维码和外部联系方式。"
             "文案只使用稳妥表达：按说明合理使用、日常口腔护理、信息以说明书和资质文件为准。"
+        )
+
+    def _product_positioning_prompt(self, fields: dict[str, Any], theme: dict[str, str]) -> str:
+        material = as_text(fields.get("材质/成分"))
+        promo_scope = as_text(fields.get("可宣传范围")) or as_text(fields.get("基础卖点"))
+        return (
+            f"产品经理定位：本图必须围绕“{theme.get('hero', theme.get('name', ''))}”展开；"
+            f"用户买点：{theme.get('buy_point', '')}；"
+            f"证明点/成分或资质依据：{theme.get('proof_points', '')}。"
+            f"产品资料中的成分信息：{material[:180]}。"
+            f"可宣传范围以此为边界：{promo_scope[:160]}。"
+            "如果原始资料含治疗、炎症、出血等高风险词，画面文案优先改成说明书口径、适用范围、护理关注、信息以资质为准。"
         )
 
     @staticmethod
