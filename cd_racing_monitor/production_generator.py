@@ -629,7 +629,7 @@ class ProductionGenerator:
                     "标准产品名称": product_name,
                     "人群": self._consumer_persona(theme, fields, index),
                     "场景": self._consumer_usage_scene(theme, fields),
-                    "卖点": self._consumer_selling_point(theme),
+                    "卖点": self._ranked_selling_points(theme, fields),
                     "消费者选择的原因": self._consumer_choice_reason(theme),
                     "产品解决了什么问题": self._consumer_problem(theme),
                     "为什么是这个产品来解决这个问题": self._why_this_product_reason(theme, fields),
@@ -724,6 +724,43 @@ class ProductionGenerator:
             "温和口感体验": "口感温和更好坚持",
         }
         return mapping.get(theme["name"], self._short_text(theme["name"], 32))
+
+    def _ranked_selling_points(self, theme: dict[str, str], fields: dict[str, Any]) -> str:
+        product_text = self._positioning_text(fields)
+        if self._is_desensitizing_toothpaste(fields):
+            mapping = {
+                "牙齿敏感护理": ["冷热酸甜敏感护理", "封闭牙本质小管原理", "脱敏膏针对性更强", "120g/支规格清楚", "资质信息可查"],
+                "牙本质小管原理": ["牙本质小管封闭逻辑", "生物活性玻璃", "氯化锶+氟化钠", "成分表清楚", "说明书口径更稳妥"],
+                "牙龈出血关注": ["牙龈出血护理关注", "菌斑性牙龈炎症适用范围", "牙龈状态管理", "医疗器械资质背书", "按说明书使用"],
+                "牙菌斑管理": ["牙菌斑管理多一步", "抑制和减少牙菌斑", "日常清洁补充", "口腔护理更细致", "资质可查"],
+                "配方成分透明": ["成分信息清楚看", "生物活性玻璃", "氯化锶+氟化钠", "β-葡聚糖", "薄荷口感成分"],
+                "居家日用步骤": ["使用步骤更清楚", "膏体形态接近日常习惯", "早晚居家可用", "按说明书使用", "收纳方便"],
+                "规格组合选择": ["1支/2支/3支/5支可选", "120g/支规格清楚", "试用和囤货都能选", "家庭多人可备", "价格带覆盖更灵活"],
+                "资质安心说明": ["资质信息清楚可查", "注册证/说明书可展示", "医疗器械属性明确", "页面信息更可信", "购买前降低疑虑"],
+                "薄荷口感体验": ["薄荷清新口感", "薄荷油+薄荷脑", "留兰香油口感支撑", "日常使用更容易坚持", "口感体验和功效分开表达"],
+                "家庭备用复购": ["家庭备用更省心", "多支组合按需选", "120g/支规格稳定", "周期护理不断档", "性价比选择空间更大"],
+            }
+            points = mapping.get(theme["name"], [])
+        elif "含漱" in product_text:
+            mapping = {
+                "日常口腔护理": ["日常护理多一步", "饭后/刷牙后都能用", "200ml规格清楚", "使用动作简单", "资质信息可查"],
+                "正畸人群护理": ["正畸清洁后补充护理", "使用方便", "不增加复杂步骤", "适合居家洗漱台", "规格清楚"],
+                "家庭备用护理": ["家庭常备更省心", "多人按需使用", "200ml/瓶好收纳", "洗漱台常备", "购买选择清楚"],
+                "饭后清爽护理": ["饭后口腔更清爽", "午饭后/社交前可用", "护理动作简单", "随手补充一步", "体验感明确"],
+                "出行便携护理": ["出门也能随手护理", "通勤/旅行场景适用", "产品识别清楚", "收纳方便", "保持护理习惯"],
+                "成分信息透明": ["成分规格看得清", "资质信息可查", "适用范围清楚", "买前更放心", "不夸大功效"],
+                "使用步骤清晰": ["使用步骤更简单", "首次购买容易理解", "按说明合理使用", "护理流程清楚", "降低使用门槛"],
+                "规格组合清楚": ["瓶数组合好选择", "1瓶/2瓶/3瓶可选", "家庭备用更直观", "减少SKU疑虑", "价格选择清楚"],
+                "资质安心说明": ["资质信息清楚可查", "说明书/标签可展示", "医疗器械信息明确", "购买前降低疑虑", "页面更可信"],
+                "温和口感体验": ["口感温和更好坚持", "日常入口体验", "早晚使用更舒服", "体验方向清楚", "不夸大效果"],
+            }
+            points = mapping.get(theme["name"], [])
+        else:
+            points = []
+        if not points:
+            base = [theme.get("hero", theme["name"]), theme.get("buy_point", ""), theme.get("proof_points", ""), theme.get("angle", "")]
+            points = [point for point in base if point]
+        return "\n".join(f"{index}. {self._short_text(point, 36)}" for index, point in enumerate(points[:5], 1))
 
     def _consumer_choice_reason(self, theme: dict[str, str]) -> str:
         if theme.get("buy_point"):
